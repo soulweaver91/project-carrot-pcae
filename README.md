@@ -12,9 +12,8 @@ Version compatibility:
 * Retail 1.20 (European) - **SUPPORTED**
 * Retail 1.20 (American) - **PARTIALLY SUPPORTED**: Extraction will likely work,
   but filename assignments will likely be wrong at this time. Not tested.
-* Patched retail 1.23 (European) - **UNKNOWN**: Not tested, assumed to work.
-* Patched retail 1.23 (American) - **UNKNOWN**: Not tested. If works, likely
-  to same degree as American 1.20.
+* Patched retail 1.23 (European) - **SUPPORTED**
+* Patched retail 1.23 (American) - **PARTIALLY SUPPORTED**: Same as 1.20.
 * Retail 1.23x (Holiday Hare '98): **UNKNOWN**
 * Retail 1.24 (The Secret Files) - **SUPPORTED**
 * Retail 1.24x (Christmas Chronicles) - **UNKNOWN**: Not tested, assumed to work.
