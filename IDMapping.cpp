@@ -217,7 +217,7 @@ std::unique_ptr<AnimIDMap> getAnimMappingForVersion(JJ2Version version) {
     map->insert(qMakePair( 24,  1), makeAnimMapping("demon", "attack_start"));
     map->insert(qMakePair( 24,  2), makeAnimMapping("demon", "attack"));
     map->insert(qMakePair( 24,  3), makeAnimMapping("demon", "attack_end"));
-    map->insert(qMakePair( 25,  4), makeAnimMapping("common", "block_frozen"));
+    map->insert(qMakePair( 25,  4), makeAnimMapping("common", "ice_block"));
     map->insert(qMakePair( 26,  0), makeAnimMapping("devan", "bullet_small"));
     map->insert(qMakePair( 26,  1), makeAnimMapping("devan", "remote_idle"));
     map->insert(qMakePair( 26,  2), makeAnimMapping("devan", "remote_fall_warp_out"));
@@ -309,7 +309,7 @@ std::unique_ptr<AnimIDMap> getAnimMappingForVersion(JJ2Version version) {
     map->insert(qMakePair( 47 - offset,  9 - offset_local), makeAnimMapping("frog", "tongue_hor"));
     map->insert(qMakePair( 47 - offset, 10 - offset_local), makeAnimMapping("frog", "tongue_ver"));
     map->insert(qMakePair( 47 - offset, 11 - offset_local), makeAnimMapping("spaz", "transform_frog"));
-    map->insert(qMakePair( 47 - offset, 12 - offset_local), makeAnimMapping("frog", "walk"));
+    map->insert(qMakePair( 47 - offset, 12 - offset_local), makeAnimMapping("frog", "run"));
     map->insert(qMakePair( 48 - offset,  0), makeAnimMapping("platform", "carrotus_fruit"));
     map->insert(qMakePair( 48 - offset,  1), makeAnimMapping("platform", "carrotus_fruit_chain"));
     map->insert(qMakePair( 49 - offset,  0), makeAnimMapping("pickup", "gem_gemring", GEM_PALETTE));
@@ -386,13 +386,13 @@ std::unique_ptr<AnimIDMap> getAnimMappingForVersion(JJ2Version version) {
     map->insert(qMakePair( 55 - offset, 43 + offset_local), makeAnimMapping("jazz", "lift_jump_heavy"));
     map->insert(qMakePair( 55 - offset, 44 + offset_local), makeAnimMapping("jazz", "lookup_start"));
     if (useOffsets) {
-        map->insert(qMakePair( 55 - offset, 45 + offset_local), makeAnimMapping("jazz", "unused_walk_diag_upright"));
-        map->insert(qMakePair( 55 - offset, 46 + offset_local), makeAnimMapping("jazz", "unused_walk_ver_up"));
-        map->insert(qMakePair( 55 - offset, 47 + offset_local), makeAnimMapping("jazz", "unused_walk_diag_upleft_reverse"));
-        map->insert(qMakePair( 55 - offset, 48 + offset_local), makeAnimMapping("jazz", "unused_walk_reverse"));
-        map->insert(qMakePair( 55 - offset, 49 + offset_local), makeAnimMapping("jazz", "unused_walk_diag_downleft_reverse"));
-        map->insert(qMakePair( 55 - offset, 50 + offset_local), makeAnimMapping("jazz", "unused_walk_ver_down"));
-        map->insert(qMakePair( 55 - offset, 51 + offset_local), makeAnimMapping("jazz", "unused_walk_diag_downright"));
+        map->insert(qMakePair( 55 - offset, 45 + offset_local), makeAnimMapping("jazz", "unused_run_diag_upright"));
+        map->insert(qMakePair( 55 - offset, 46 + offset_local), makeAnimMapping("jazz", "unused_run_ver_up"));
+        map->insert(qMakePair( 55 - offset, 47 + offset_local), makeAnimMapping("jazz", "unused_run_diag_upleft_reverse"));
+        map->insert(qMakePair( 55 - offset, 48 + offset_local), makeAnimMapping("jazz", "unused_run_reverse"));
+        map->insert(qMakePair( 55 - offset, 49 + offset_local), makeAnimMapping("jazz", "unused_run_diag_downleft_reverse"));
+        map->insert(qMakePair( 55 - offset, 50 + offset_local), makeAnimMapping("jazz", "unused_run_ver_down"));
+        map->insert(qMakePair( 55 - offset, 51 + offset_local), makeAnimMapping("jazz", "unused_run_diag_downright"));
         offset_local += 7;
     }
     map->insert(qMakePair( 55 - offset, 45 + offset_local), makeAnimMapping("jazz", "dizzy_walk"));
@@ -414,12 +414,12 @@ std::unique_ptr<AnimIDMap> getAnimMappingForVersion(JJ2Version version) {
         offset_local += 3;
     }
     map->insert(qMakePair( 55 - offset, 53 + offset_local), makeAnimMapping("jazz", "ball"));
-    map->insert(qMakePair( 55 - offset, 54 + offset_local), makeAnimMapping("jazz", "walk"));
+    map->insert(qMakePair( 55 - offset, 54 + offset_local), makeAnimMapping("jazz", "run"));
     if (useOffsets) {
-        map->insert(qMakePair( 55 - offset, 55 + offset_local), makeAnimMapping("jazz", "unused_walk_aim_diag"));
+        map->insert(qMakePair( 55 - offset, 55 + offset_local), makeAnimMapping("jazz", "unused_run_aim_diag"));
         offset_local += 1;
     }
-    map->insert(qMakePair( 55 - offset, 55 + offset_local), makeAnimMapping("jazz", "run"));
+    map->insert(qMakePair( 55 - offset, 55 + offset_local), makeAnimMapping("jazz", "dash_start"));
     map->insert(qMakePair( 55 - offset, 56 + offset_local), makeAnimMapping("jazz", "dash"));
     map->insert(qMakePair( 55 - offset, 57 + offset_local), makeAnimMapping("jazz", "dash_stop"));
     map->insert(qMakePair( 55 - offset, 58 + offset_local), makeAnimMapping("jazz", "walk_stop"));
@@ -436,10 +436,10 @@ std::unique_ptr<AnimIDMap> getAnimMappingForVersion(JJ2Version version) {
     map->insert(qMakePair( 55 - offset, 69 + offset_local), makeAnimMapping("jazz", "swim_diag_right_to_upright"));
     map->insert(qMakePair( 55 - offset, 70 + offset_local), makeAnimMapping("jazz", "swim_diag_upright"));
     map->insert(qMakePair( 55 - offset, 71 + offset_local), makeAnimMapping("jazz", "swing"));
-    map->insert(qMakePair( 55 - offset, 72 + offset_local), makeAnimMapping("jazz", "warp_out"));
-    map->insert(qMakePair( 55 - offset, 73 + offset_local), makeAnimMapping("jazz", "warp_in_freefall"));
+    map->insert(qMakePair( 55 - offset, 72 + offset_local), makeAnimMapping("jazz", "warp_in"));
+    map->insert(qMakePair( 55 - offset, 73 + offset_local), makeAnimMapping("jazz", "warp_out_freefall"));
     map->insert(qMakePair( 55 - offset, 74 + offset_local), makeAnimMapping("jazz", "freefall"));
-    map->insert(qMakePair( 55 - offset, 75 + offset_local), makeAnimMapping("jazz", "warp_out_freefall"));
+    map->insert(qMakePair( 55 - offset, 75 + offset_local), makeAnimMapping("jazz", "warp_in_freefall"));
     map->insert(qMakePair( 55 - offset, 76 + offset_local), makeAnimMapping("jazz", "warp_out"));
     map->insert(qMakePair( 55 - offset, 77 + offset_local), makeAnimMapping("jazz", "pole_v"));
     if (useOffsets) {
@@ -451,7 +451,7 @@ std::unique_ptr<AnimIDMap> getAnimMappingForVersion(JJ2Version version) {
         map->insert(qMakePair( 55 - offset, 83 + offset_local), makeAnimMapping("jazz", "unused_unarmed_jump"));
         map->insert(qMakePair( 55 - offset, 84 + offset_local), makeAnimMapping("jazz", "unused_unarmed_crouch_end_2"));
         map->insert(qMakePair( 55 - offset, 85 + offset_local), makeAnimMapping("jazz", "unused_lookup_start"));
-        map->insert(qMakePair( 55 - offset, 86 + offset_local), makeAnimMapping("jazz", "unused_unarmed_walk"));
+        map->insert(qMakePair( 55 - offset, 86 + offset_local), makeAnimMapping("jazz", "unused_unarmed_run"));
         map->insert(qMakePair( 55 - offset, 87 + offset_local), makeAnimMapping("jazz", "unused_unarmed_stare"));
         map->insert(qMakePair( 55 - offset, 88 + offset_local), makeAnimMapping("jazz", "unused_lookup_start_2"));
         map->insert(qMakePair( 56 - offset,  0), makeAnimMapping("unimplemented", "bonus_jazz_idle_flavor_2"));
@@ -459,14 +459,14 @@ std::unique_ptr<AnimIDMap> getAnimMappingForVersion(JJ2Version version) {
         map->insert(qMakePair( 56 - offset,  2), makeAnimMapping("unimplemented", "bonus_jazz_dash_2"));
         map->insert(qMakePair( 56 - offset,  3), makeAnimMapping("unimplemented", "bonus_jazz_rotate_2"));
         map->insert(qMakePair( 56 - offset,  4), makeAnimMapping("unimplemented", "bonus_jazz_ball_2"));
-        map->insert(qMakePair( 56 - offset,  5), makeAnimMapping("unimplemented", "bonus_jazz_walk_2"));
+        map->insert(qMakePair( 56 - offset,  5), makeAnimMapping("unimplemented", "bonus_jazz_run_2"));
         map->insert(qMakePair( 56 - offset,  6), makeAnimMapping("unimplemented", "bonus_jazz_idle_2"));
         offset_local = 7;
     }
     map->insert(qMakePair( 56 - offset,  0 + offset_local), makeAnimMapping("unimplemented", "bonus_jazz_idle_flavor"));
     map->insert(qMakePair( 56 - offset,  1 + offset_local), makeAnimMapping("unimplemented", "bonus_jazz_jump"));
     map->insert(qMakePair( 56 - offset,  2 + offset_local), makeAnimMapping("unimplemented", "bonus_jazz_ball"));
-    map->insert(qMakePair( 56 - offset,  3 + offset_local), makeAnimMapping("unimplemented", "bonus_jazz_walk"));
+    map->insert(qMakePair( 56 - offset,  3 + offset_local), makeAnimMapping("unimplemented", "bonus_jazz_run"));
     map->insert(qMakePair( 56 - offset,  4 + offset_local), makeAnimMapping("unimplemented", "bonus_jazz_dash"));
     map->insert(qMakePair( 56 - offset,  5 + offset_local), makeAnimMapping("unimplemented", "bonus_jazz_rotate"));
     map->insert(qMakePair( 56 - offset,  6 + offset_local), makeAnimMapping("unimplemented", "bonus_jazz_idle"));
@@ -536,8 +536,8 @@ std::unique_ptr<AnimIDMap> getAnimMappingForVersion(JJ2Version version) {
         map->insert(qMakePair( 61 - offset, 51), makeAnimMapping("lori", "fall_diag"));
         map->insert(qMakePair( 61 - offset, 52), makeAnimMapping("lori", "jump_diag"));
         map->insert(qMakePair( 61 - offset, 53), makeAnimMapping("lori", "ball"));
-        map->insert(qMakePair( 61 - offset, 54), makeAnimMapping("lori", "walk"));
-        map->insert(qMakePair( 61 - offset, 55), makeAnimMapping("lori", "run"));
+        map->insert(qMakePair( 61 - offset, 54), makeAnimMapping("lori", "run"));
+        map->insert(qMakePair( 61 - offset, 55), makeAnimMapping("lori", "dash_start"));
         map->insert(qMakePair( 61 - offset, 56), makeAnimMapping("lori", "dash"));
         map->insert(qMakePair( 61 - offset, 57), makeAnimMapping("lori", "dash_stop"));
         map->insert(qMakePair( 61 - offset, 58), makeAnimMapping("lori", "walk_stop"));
@@ -554,10 +554,10 @@ std::unique_ptr<AnimIDMap> getAnimMappingForVersion(JJ2Version version) {
         map->insert(qMakePair( 61 - offset, 69), makeAnimMapping("lori", "swim_diag_right_to_upright"));
         map->insert(qMakePair( 61 - offset, 70), makeAnimMapping("lori", "swim_diag_upright"));
         map->insert(qMakePair( 61 - offset, 71), makeAnimMapping("lori", "swing"));
-        map->insert(qMakePair( 61 - offset, 72), makeAnimMapping("lori", "warp_out"));
-        map->insert(qMakePair( 61 - offset, 73), makeAnimMapping("lori", "warp_in_freefall"));
+        map->insert(qMakePair( 61 - offset, 72), makeAnimMapping("lori", "warp_in"));
+        map->insert(qMakePair( 61 - offset, 73), makeAnimMapping("lori", "warp_out_freefall"));
         map->insert(qMakePair( 61 - offset, 74), makeAnimMapping("lori", "freefall"));
-        map->insert(qMakePair( 61 - offset, 75), makeAnimMapping("lori", "warp_out_freefall"));
+        map->insert(qMakePair( 61 - offset, 75), makeAnimMapping("lori", "warp_in_freefall"));
         map->insert(qMakePair( 61 - offset, 76), makeAnimMapping("lori", "warp_out"));
         map->insert(qMakePair( 61 - offset, 77), makeAnimMapping("lori", "pole_v"));
         map->insert(qMakePair( 62 - offset,  0), makeAnimMapping("lori", "idle_2"));
@@ -653,10 +653,10 @@ std::unique_ptr<AnimIDMap> getAnimMappingForVersion(JJ2Version version) {
     map->insert(qMakePair( 71 - offset, 41), makeAnimMapping("ui", "heart"));
     map->insert(qMakePair( 71 - offset, 42), makeAnimMapping("pickup", "freeze_enemies"));
     map->insert(qMakePair( 71 - offset, 43), makeAnimMapping("pickup", "food_ice_cream"));
-    map->insert(qMakePair( 71 - offset, 44), makeAnimMapping("object", "unknown_sharpnel_1"));
-    map->insert(qMakePair( 71 - offset, 45), makeAnimMapping("object", "unknown_sharpnel_2"));
-    map->insert(qMakePair( 71 - offset, 46), makeAnimMapping("object", "unknown_sharpnel_3"));
-    map->insert(qMakePair( 71 - offset, 47), makeAnimMapping("object", "unknown_sharpnel_4"));
+    map->insert(qMakePair( 71 - offset, 44), makeAnimMapping("common", "ice_break_shrapnel_1"));
+    map->insert(qMakePair( 71 - offset, 45), makeAnimMapping("common", "ice_break_shrapnel_2"));
+    map->insert(qMakePair( 71 - offset, 46), makeAnimMapping("common", "ice_break_shrapnel_3"));
+    map->insert(qMakePair( 71 - offset, 47), makeAnimMapping("common", "ice_break_shrapnel_4"));
     map->insert(qMakePair( 71 - offset, 48), makeAnimMapping("pickup", "food_lemon"));
     map->insert(qMakePair( 71 - offset, 49), makeAnimMapping("pickup", "food_lettuce"));
     map->insert(qMakePair( 71 - offset, 50), makeAnimMapping("pickup", "food_lime"));
@@ -689,19 +689,19 @@ std::unique_ptr<AnimIDMap> getAnimMappingForVersion(JJ2Version version) {
     map->insert(qMakePair( 71 - offset, 77), makeAnimMapping("pickup", "food_pizza"));
     map->insert(qMakePair( 71 - offset, 78), makeAnimMapping("pickup", "potion"));
     map->insert(qMakePair( 71 - offset, 79), makeAnimMapping("pickup", "food_pretzel"));
-    map->insert(qMakePair( 71 - offset, 80), makeAnimMapping("pickup", "sandwich"));
-    map->insert(qMakePair( 71 - offset, 81), makeAnimMapping("pickup", "strawberry"));
+    map->insert(qMakePair( 71 - offset, 80), makeAnimMapping("pickup", "food_sandwich"));
+    map->insert(qMakePair( 71 - offset, 81), makeAnimMapping("pickup", "food_strawberry"));
     map->insert(qMakePair( 71 - offset, 82), makeAnimMapping("pickup", "carrot_full"));
     map->insert(qMakePair( 71 - offset, 83), makeAnimMapping("object", "powerup_upgrade_blaster_spaz"));
     map->insert(qMakePair( 71 - offset, 84), makeAnimMapping("pickup", "coin_silver"));
     map->insert(qMakePair( 71 - offset, 85), makeAnimMapping("unknown", "green_blast_thing_2"));
     map->insert(qMakePair( 71 - offset, 86), makeAnimMapping("common", "generator"));
     map->insert(qMakePair( 71 - offset, 87), makeAnimMapping("pickup", "stopwatch"));
-    map->insert(qMakePair( 71 - offset, 88), makeAnimMapping("pickup", "taco"));
-    map->insert(qMakePair( 71 - offset, 89), makeAnimMapping("pickup", "thing"));
+    map->insert(qMakePair( 71 - offset, 88), makeAnimMapping("pickup", "food_taco"));
+    map->insert(qMakePair( 71 - offset, 89), makeAnimMapping("pickup", "food_thing"));
     map->insert(qMakePair( 71 - offset, 90), makeAnimMapping("object", "tnt"));
-    map->insert(qMakePair( 71 - offset, 91), makeAnimMapping("pickup", "hotdog"));
-    map->insert(qMakePair( 71 - offset, 92), makeAnimMapping("pickup", "watermelon"));
+    map->insert(qMakePair( 71 - offset, 91), makeAnimMapping("pickup", "food_hotdog"));
+    map->insert(qMakePair( 71 - offset, 92), makeAnimMapping("pickup", "food_watermelon"));
     map->insert(qMakePair( 71 - offset, 93), makeAnimMapping("object", "container_crate_shrapnel_1"));
     map->insert(qMakePair( 71 - offset, 94), makeAnimMapping("object", "container_crate_shrapnel_2"));
     map->insert(qMakePair( 72 - offset,  0), makeAnimMapping("pinball", "bumper_500", PINBALL_PALETTE));
@@ -830,13 +830,13 @@ std::unique_ptr<AnimIDMap> getAnimMappingForVersion(JJ2Version version) {
     map->insert(qMakePair( 89 - offset, 43 + offset_local), makeAnimMapping("spaz", "lift_jump_heavy"));
     map->insert(qMakePair( 89 - offset, 44 + offset_local), makeAnimMapping("spaz", "lookup_start"));
     if (useOffsets) {
-        map->insert(qMakePair( 89 - offset, 45 + offset_local), makeAnimMapping("spaz", "unused_walk_diag_upright"));
-        map->insert(qMakePair( 89 - offset, 46 + offset_local), makeAnimMapping("spaz", "unused_walk_ver_up"));
-        map->insert(qMakePair( 89 - offset, 47 + offset_local), makeAnimMapping("spaz", "unused_walk_diag_upleft_reverse"));
-        map->insert(qMakePair( 89 - offset, 48 + offset_local), makeAnimMapping("spaz", "unused_walk_reverse"));
-        map->insert(qMakePair( 89 - offset, 49 + offset_local), makeAnimMapping("spaz", "unused_walk_diag_downleft_reverse"));
-        map->insert(qMakePair( 89 - offset, 50 + offset_local), makeAnimMapping("spaz", "unused_walk_ver_down"));
-        map->insert(qMakePair( 89 - offset, 51 + offset_local), makeAnimMapping("spaz", "unused_walk_diag_downright"));
+        map->insert(qMakePair( 89 - offset, 45 + offset_local), makeAnimMapping("spaz", "unused_run_diag_upright"));
+        map->insert(qMakePair( 89 - offset, 46 + offset_local), makeAnimMapping("spaz", "unused_run_ver_up"));
+        map->insert(qMakePair( 89 - offset, 47 + offset_local), makeAnimMapping("spaz", "unused_run_diag_upleft_reverse"));
+        map->insert(qMakePair( 89 - offset, 48 + offset_local), makeAnimMapping("spaz", "unused_run_reverse"));
+        map->insert(qMakePair( 89 - offset, 49 + offset_local), makeAnimMapping("spaz", "unused_run_diag_downleft_reverse"));
+        map->insert(qMakePair( 89 - offset, 50 + offset_local), makeAnimMapping("spaz", "unused_run_ver_down"));
+        map->insert(qMakePair( 89 - offset, 51 + offset_local), makeAnimMapping("spaz", "unused_run_diag_downright"));
         offset_local += 7;
     }
     map->insert(qMakePair( 89 - offset, 45 + offset_local), makeAnimMapping("spaz", "dizzy_walk"));
@@ -858,12 +858,12 @@ std::unique_ptr<AnimIDMap> getAnimMappingForVersion(JJ2Version version) {
         offset_local += 3;
     }
     map->insert(qMakePair( 89 - offset, 53 + offset_local), makeAnimMapping("spaz", "ball"));
-    map->insert(qMakePair( 89 - offset, 54 + offset_local), makeAnimMapping("spaz", "walk"));
+    map->insert(qMakePair( 89 - offset, 54 + offset_local), makeAnimMapping("spaz", "run"));
     if (useOffsets) {
-        map->insert(qMakePair( 89 - offset, 55 + offset_local), makeAnimMapping("spaz", "unused_walk_aim_diag"));
+        map->insert(qMakePair( 89 - offset, 55 + offset_local), makeAnimMapping("spaz", "unused_run_aim_diag"));
         offset_local += 1;
     }
-    map->insert(qMakePair( 89 - offset, 55 + offset_local), makeAnimMapping("spaz", "run"));
+    map->insert(qMakePair( 89 - offset, 55 + offset_local), makeAnimMapping("spaz", "dash_start"));
     map->insert(qMakePair( 89 - offset, 56 + offset_local), makeAnimMapping("spaz", "dash"));
     map->insert(qMakePair( 89 - offset, 57 + offset_local), makeAnimMapping("spaz", "dash_stop"));
     map->insert(qMakePair( 89 - offset, 58 + offset_local), makeAnimMapping("spaz", "walk_stop"));
@@ -880,10 +880,10 @@ std::unique_ptr<AnimIDMap> getAnimMappingForVersion(JJ2Version version) {
     map->insert(qMakePair( 89 - offset, 69 + offset_local), makeAnimMapping("spaz", "swim_diag_right_to_upright"));
     map->insert(qMakePair( 89 - offset, 70 + offset_local), makeAnimMapping("spaz", "swim_diag_upright"));
     map->insert(qMakePair( 89 - offset, 71 + offset_local), makeAnimMapping("spaz", "swing"));
-    map->insert(qMakePair( 89 - offset, 72 + offset_local), makeAnimMapping("spaz", "warp_out"));
-    map->insert(qMakePair( 89 - offset, 73 + offset_local), makeAnimMapping("spaz", "warp_in_freefall"));
+    map->insert(qMakePair( 89 - offset, 72 + offset_local), makeAnimMapping("spaz", "warp_in"));
+    map->insert(qMakePair( 89 - offset, 73 + offset_local), makeAnimMapping("spaz", "warp_out_freefall"));
     map->insert(qMakePair( 89 - offset, 74 + offset_local), makeAnimMapping("spaz", "freefall"));
-    map->insert(qMakePair( 89 - offset, 75 + offset_local), makeAnimMapping("spaz", "warp_out_freefall"));
+    map->insert(qMakePair( 89 - offset, 75 + offset_local), makeAnimMapping("spaz", "warp_in_freefall"));
     map->insert(qMakePair( 89 - offset, 76 + offset_local), makeAnimMapping("spaz", "warp_out"));
     map->insert(qMakePair( 89 - offset, 77 + offset_local), makeAnimMapping("spaz", "pole_v"));
     if (useOffsets) {
@@ -895,7 +895,7 @@ std::unique_ptr<AnimIDMap> getAnimMappingForVersion(JJ2Version version) {
         map->insert(qMakePair( 89 - offset, 83 + offset_local), makeAnimMapping("spaz", "unused_unarmed_jump"));
         map->insert(qMakePair( 89 - offset, 84 + offset_local), makeAnimMapping("spaz", "unused_unarmed_crouch_end_2"));
         map->insert(qMakePair( 89 - offset, 85 + offset_local), makeAnimMapping("spaz", "unused_lookup_start"));
-        map->insert(qMakePair( 89 - offset, 86 + offset_local), makeAnimMapping("spaz", "unused_unarmed_walk"));
+        map->insert(qMakePair( 89 - offset, 86 + offset_local), makeAnimMapping("spaz", "unused_unarmed_run"));
         map->insert(qMakePair( 89 - offset, 87 + offset_local), makeAnimMapping("spaz", "unused_unarmed_stare"));
         map->insert(qMakePair( 89 - offset, 88 + offset_local), makeAnimMapping("spaz", "unused_lookup_start_2"));
     }
@@ -906,7 +906,7 @@ std::unique_ptr<AnimIDMap> getAnimMappingForVersion(JJ2Version version) {
     map->insert(qMakePair( 91 - offset,  0), makeAnimMapping("unimplemented", "bonus_spaz_idle_flavor"));
     map->insert(qMakePair( 91 - offset,  1), makeAnimMapping("unimplemented", "bonus_spaz_jump"));
     map->insert(qMakePair( 91 - offset,  2), makeAnimMapping("unimplemented", "bonus_spaz_ball"));
-    map->insert(qMakePair( 91 - offset,  3), makeAnimMapping("unimplemented", "bonus_spaz_walk"));
+    map->insert(qMakePair( 91 - offset,  3), makeAnimMapping("unimplemented", "bonus_spaz_run"));
     map->insert(qMakePair( 91 - offset,  4), makeAnimMapping("unimplemented", "bonus_spaz_dash"));
     map->insert(qMakePair( 91 - offset,  5), makeAnimMapping("unimplemented", "bonus_spaz_rotate"));
     map->insert(qMakePair( 91 - offset,  6), makeAnimMapping("unimplemented", "bonus_spaz_idle"));
@@ -1117,7 +1117,7 @@ std::unique_ptr<SampleIDMap> getSampleMappingForVersion(JJ2Version version) {
     map->insert(qMakePair( 22,  31), makeSampleMapping("pickup", "shield_lightning_bullet_2"));
     map->insert(qMakePair( 22,  32), makeSampleMapping("pickup", "shield_lightning_bullet_3"));
     map->insert(qMakePair( 22,  33), makeSampleMapping("weapon", "tnt"));
-    map->insert(qMakePair( 22,  34), makeSampleMapping("common", "explsm1"));
+    map->insert(qMakePair( 22,  34), makeSampleMapping("weapon", "wall_poof"));
     map->insert(qMakePair( 22,  35), makeSampleMapping("weapon", "toaster"));
     map->insert(qMakePair( 22,  36), makeSampleMapping("common", "flap"));
     map->insert(qMakePair( 22,  37), makeSampleMapping("common", "swish_9"));
