@@ -8,7 +8,8 @@ but can also be used for more general purposes.
 Version compatibility:
 
 * Pre-release versions (1.00g, 1.00h, 1.10o, etc.): **UNSUPPORTED**.
-  Not tested, but expected to not work.
+  1.00g tested, sound samples are in a currently unsupported format and
+  animation mappings are somewhat different.
 * Retail 1.20 (European) - **SUPPORTED**
 * Retail 1.20 (American) - **PARTIALLY SUPPORTED**: Extraction will likely work,
   but filename assignments will likely be wrong at this time. Not tested.
@@ -16,7 +17,9 @@ Version compatibility:
 * Patched retail 1.23 (American) - **PARTIALLY SUPPORTED**: Same as 1.20.
 * Retail 1.23x (Holiday Hare '98): **UNKNOWN**
 * Retail 1.24 (The Secret Files) - **SUPPORTED**
-* Retail 1.24x (Christmas Chronicles) - **UNKNOWN**: Not tested, assumed to work.
+* Retail 1.24x (Christmas Chronicles) - **SUPPORTED with defects**: Sets 46 and 65
+  currently require amended mappings to TSF due to additional logo art and the snow
+  effect used in the menu. Other sets seem to extract fine.
 
 ## Usage
 
