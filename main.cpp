@@ -614,6 +614,7 @@ int main(int argc, char *argv[]) {
                 })));
             }
 
+            root.insert("fps", QJsonValue(currentAnim->fps));
             root.insert("scaling", QJsonValue(1));
             root.insert("meta", meta);
 
