@@ -19,7 +19,7 @@
 #include <palette.h>
 #include <IDMapping.h>
 
-const std::string PCAE_VERSION = "0.9.1";
+const std::string PCAE_VERSION = "0.9.3";
 const AnimMapping EMPTY_ANIM_MAPPING = makeAnimMapping("", "");
 const SampleMapping EMPTY_SAMPLE_MAPPING = makeSampleMapping("", "");
 
