@@ -5,6 +5,9 @@ Jazz Jackrabbit 2 installation. It is primarily targeted as a tool for obtaining
 set of assets for [Project Carrot](https://github.com/soulweaver91/project-carrot),
 but can also be used for more general purposes.
 
+You can download prebuilt Windows binaries over at the 
+[Project Carrot homepage](https://carrot.soulweaver.fi/).
+
 Version compatibility:
 
 * Pre-release versions (1.00g, 1.00h, 1.10o, etc.): **UNSUPPORTED**.
