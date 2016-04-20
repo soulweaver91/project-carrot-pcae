@@ -42,8 +42,9 @@ mapping are saved to the asset folder root.
 
 Compiling requires [SFML 2.x](http://www.sfml-dev.org/download.php),
 [Qt 5.x](http://www.qt.io/download/) and Microsoft Visual Studio 2015.
-Configure the Qt settings with the MSVS Qt 5 plugin, then set up the user macro
-`SFML_DIR` in the property sheet to point to the location of your SFML installation.
+Configure the Qt settings with the MSVS Qt 5 plugin, then set up the macro
+`SFML_DIR` in the user property sheets (`Microsoft.Cpp.Win32.user` and 
+`Microsoft.Cpp.x64.user`) to point to the location of your SFML installation.
 
 MSVS is not strictly required as long as you know how to set up a build
 system manually, though.
