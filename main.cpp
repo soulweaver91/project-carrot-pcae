@@ -19,7 +19,7 @@
 #include <palette.h>
 #include <IDMapping.h>
 
-const std::string PCAE_VERSION = "0.9.3";
+const std::string PCAE_VERSION = "0.9.4";
 const AnimMapping EMPTY_ANIM_MAPPING = makeAnimMapping("", "");
 const SampleMapping EMPTY_SAMPLE_MAPPING = makeSampleMapping("", "");
 
@@ -114,6 +114,7 @@ struct J2Anim {
     QPair<qint16, qint16> adjustedSize;
     QPair<qint16, qint16> largestOffset;
     QPair<qint16, qint16> normalizedHotspot;
+    QPair<qint16, qint16> frameConfiguration;
 };
 
 struct J2Sample {
@@ -542,9 +543,25 @@ int main(int argc, char *argv[]) {
             std::shared_ptr<J2Anim> currentAnim = anims.at(i);
             AnimMapping mappingForAnim = animMapping->value(qMakePair(currentAnim->set, currentAnim->anim), EMPTY_ANIM_MAPPING);
 
+            // Determine the frame configuration to use.
+            // Each asset must fit into a 4096 by 4096 texture,
+            // as that is the smallest texture size we have decided to support.
+            currentAnim->frameConfiguration.first = currentAnim->frameCnt;
+            currentAnim->frameConfiguration.second = 1;
+            if (currentAnim->frameCnt > 1) {
+                currentAnim->frameConfiguration.second = std::max(1, (int)std::ceil(std::sqrt(currentAnim->frameCnt * currentAnim->adjustedSize.first / currentAnim->adjustedSize.second)));
+                currentAnim->frameConfiguration.first = std::max(1, (int)std::ceil(currentAnim->frameCnt * 1.0 / currentAnim->frameConfiguration.second));
+
+                // Do a bit of optimization, as the above algorithm ends occasionally with some extra space
+                // (it is careful with not underestimating the required space)
+                while (currentAnim->frameConfiguration.first * (currentAnim->frameConfiguration.second - 1) >= currentAnim->frameCnt) {
+                    currentAnim->frameConfiguration.second--;
+                }
+            }
+
             sf::Image img;
-            img.create(currentAnim->adjustedSize.first * currentAnim->frames.length(),
-                        currentAnim->adjustedSize.second, sf::Color(0, 0, 0, 0));
+            img.create(currentAnim->adjustedSize.first * currentAnim->frameConfiguration.first,
+                        currentAnim->adjustedSize.second * currentAnim->frameConfiguration.second, sf::Color(0, 0, 0, 0));
 
             for (int j = 0; j < currentAnim->frames.length(); ++j) {
                 J2AnimFrame* frame = &currentAnim->frames[j];
@@ -553,8 +570,8 @@ int main(int argc, char *argv[]) {
 
                 for (quint16 y = 0; y < frame->size.second; ++y) {
                     for (quint16 x = 0; x < frame->size.first; ++x) {
-                        quint16 targetX = j * currentAnim->adjustedSize.first + offsetX + x;
-                        quint16 targetY = offsetY + y;
+                        quint16 targetX = (j % currentAnim->frameConfiguration.first) * currentAnim->adjustedSize.first + offsetX + x;
+                        quint16 targetY = (j / currentAnim->frameConfiguration.first) * currentAnim->adjustedSize.second + offsetY + y;
                         quint8 colorIdx = frame->imageData.at(frame->size.first * y + x);
                         sf::Color color = mappingForAnim.palette[colorIdx];
                         if (frame->drawTransparent) {
@@ -595,6 +612,9 @@ int main(int argc, char *argv[]) {
             QJsonObject root;
             root.insert("width", QJsonValue(currentAnim->adjustedSize.first));
             root.insert("height", QJsonValue(currentAnim->adjustedSize.second));
+            root.insert("framesPerRow", QJsonValue(currentAnim->frameConfiguration.first));
+            root.insert("framesPerCol", QJsonValue(currentAnim->frameConfiguration.second));
+            root.insert("frameCount", QJsonValue(currentAnim->frameCnt));
             root.insert("hotspot", QJsonValue(QJsonArray({ currentAnim->normalizedHotspot.first, currentAnim->normalizedHotspot.second })));
             if (currentAnim->frames[0].coldspot.first == 0 && currentAnim->frames[0].coldspot.second == 0) {
                 root.insert("coldspot", QJsonValue::Null);
