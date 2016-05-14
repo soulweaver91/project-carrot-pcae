@@ -35,7 +35,7 @@ typedef QMap<SetResourcePair, SampleMapping> SampleIDMap;
 
 class IDMapper {
 public:
-    IDMapper(const JJ2Version& version);
+    IDMapper(const uint& version);
     std::unique_ptr<AnimIDMap> getAnimMapping();
     std::unique_ptr<SampleIDMap> getSampleMapping();
 
@@ -43,11 +43,19 @@ public:
     static const SampleMapping EMPTY_SAMPLE_MAPPING;
 
 private:
-    static SampleMapping makeSampleMapping(std::string first, std::string second);
-    static AnimMapping makeAnimMapping(std::string first, std::string second, const sf::Color* palette = SPRITE_PALETTE);
-    const JJ2Version jj2Version;
+    static SampleMapping makeSampleMapping(const std::string& first, const std::string& second);
+    static AnimMapping makeAnimMapping(const std::string& first, const std::string& second, const sf::Color* palette = SPRITE_PALETTE);
+    const uint jj2Version;
+
+    void nextSet(const int advanceBy = 1, const uint appliesTo = JJ2Version::ALL);
+    void addAnimMapping(const uint appliesTo, const std::string& first, const std::string& second, const sf::Color* palette = SPRITE_PALETTE);
+    void addAnimMapping(const std::string& first, const std::string& second, const sf::Color* palette = SPRITE_PALETTE);
+    void addSampleMapping(const uint appliesTo, const std::string& first, const std::string& second);
+    void addSampleMapping(const std::string& first, const std::string& second);
 
     // Internal state, used in the sample mapping maker functions
     int currentSet;
     int currentItem;
+    std::unique_ptr<AnimIDMap> wipAnimMap;
+    std::unique_ptr<SampleIDMap> wipSampleMap;
 };

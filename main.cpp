@@ -176,8 +176,8 @@ int main(int argc, char *argv[]) {
             return EXIT_FAILURE;
         }
 
-        JJ2Version version = (headerLen == 464 ? JJ2Version::JJ2_ORIGINAL :
-                              headerLen == 500 ? JJ2Version::JJ2_TSF : JJ2Version::UNKNOWN);
+        uint version = (headerLen == 464 ? JJ2Version::ORIGINAL :
+                        headerLen == 500 ? JJ2Version::TSF : JJ2Version::UNKNOWN);
 
         std::cerr << "Based on the header length, this file seems to be from " 
                   << (headerLen == 464 ? "Jazz Jackrabbit 2" : 
@@ -602,9 +602,9 @@ int main(int argc, char *argv[]) {
 
             QString verString;
             switch (version) {
-                case JJ2_ORIGINAL: verString = "1.20/.23"; break;
-                case JJ2_TSF:      verString = "1.24"; break;
-                default:           verString = "unknown";
+                case JJ2Version::ORIGINAL: verString = "1.20/.23"; break;
+                case JJ2Version::TSF:      verString = "1.24"; break;
+                default:                   verString = "unknown";
             }
 
             meta.insert("animsVersion", verString);
