@@ -11,11 +11,13 @@ You can download prebuilt Windows binaries over at the
 Version compatibility:
 
 * Pre-release versions (1.00g, 1.00h, 1.10o, etc.): **UNSUPPORTED**.
-  1.00g tested, sound samples are in a currently unsupported format and
-  animation mappings are somewhat different.
+  1.00g tested; animation mappings could be extracted, but their mappings are
+  somewhat different, while sound samples are in a currently unsupported format,
+  effectively blocking the process for now.
 * Retail 1.20 (European) - **SUPPORTED**
-* Retail 1.20 (American) - **PARTIALLY SUPPORTED**: Extraction will likely work,
-  but filename assignments will likely be wrong at this time. Not tested.
+* Retail 1.20 (American) - **PARTIALLY SUPPORTED**: Extraction should work,
+  but filename assignments might be wrong. Not tested; help from someone with access
+  to an U.S. copy of the game would be appreciated.
 * Patched retail 1.23 (European) - **SUPPORTED**
 * Patched retail 1.23 (American) - **PARTIALLY SUPPORTED**: Same as 1.20.
 * Retail 1.23x (Holiday Hare '98): **UNSUPPORTED**: Resource set differs from both
