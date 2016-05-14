@@ -19,9 +19,7 @@
 #include <palette.h>
 #include <IDMapping.h>
 
-const std::string PCAE_VERSION = "0.9.4";
-const AnimMapping EMPTY_ANIM_MAPPING = makeAnimMapping("", "");
-const SampleMapping EMPTY_SAMPLE_MAPPING = makeSampleMapping("", "");
+const std::string PCAE_VERSION = "0.9.5";
 
 QByteArray BEfromLE(QByteArray le) {
     QDataStream a(le);
@@ -159,6 +157,8 @@ int main(int argc, char *argv[]) {
     qint32 filesize = fh.size();
 
     try {
+        bool seemsLikeCC = false;
+
         qint32 magicALIB = uintFromArray(fh.read(4));
         qint32 magicBABE = uintFromArray(fh.read(4));
 
@@ -177,20 +177,6 @@ int main(int argc, char *argv[]) {
             std::cerr << "ERROR: This doesn't look like an Anims.j2a file! (invalid header)\n";
             return EXIT_FAILURE;
         }
-
-        JJ2Version version = (headerLen == 464 ? JJ2Version::JJ2_ORIGINAL :
-                              headerLen == 500 ? JJ2Version::JJ2_TSF : JJ2Version::UNKNOWN);
-
-        std::cerr << "Based on the header length, this file seems to be from " 
-                  << (headerLen == 464 ? "Jazz Jackrabbit 2" : 
-                      headerLen == 500 ? "Jazz Jackrabbit 2: The Secret Files/Christmas Chronicles"
-                                       : "an unknown version of Jazz Jackrabbit 2")
-                  << ".\n";
-
-        std::unique_ptr<AnimIDMap> animMapping;
-        animMapping.swap(getAnimMappingForVersion(version));
-        std::unique_ptr<SampleIDMap> sampleMapping;
-        sampleMapping.swap(getSampleMappingForVersion(version));
 
         qint32 fileLen = uintFromArray(fh.read(4));
         qint32 crc = uintFromArray(fh.read(4));
@@ -281,6 +267,10 @@ int main(int argc, char *argv[]) {
 
                 anims.append(anim);
                 setAnims.append(anim);
+            }
+
+            if (i == 65 && setAnims.length() > 5) {
+                seemsLikeCC = true;
             }
 
             if (frameCount > 0) {
@@ -531,6 +521,28 @@ int main(int argc, char *argv[]) {
 
         fh.close();
 
+        uint version;
+        if (headerLen == 464) {
+            version = JJ2Version::ORIGINAL;
+            std::cout << "Detected Jazz Jackrabbit 2 version 1.20/1.23.\n";
+        } else if (headerLen == 500 && seemsLikeCC) {
+            version = JJ2Version::CC;
+            std::cout << "Detected Jazz Jackrabbit 2: Christmas Chronicles.\n";
+        } else if (headerLen == 500 && !seemsLikeCC) {
+            version = JJ2Version::TSF;
+            std::cout << "Detected Jazz Jackrabbit 2: The Secret Files.\n";
+        } else {
+            version = JJ2Version::UNKNOWN;
+            std::cout << "Could not determine the version.\n";
+        }
+
+        auto mapper = std::make_unique<IDMapper>(version);
+
+        std::unique_ptr<AnimIDMap> animMapping;
+        animMapping.swap(mapper->getAnimMapping());
+        std::unique_ptr<SampleIDMap> sampleMapping;
+        sampleMapping.swap(mapper->getSampleMapping());
+
         QDir outdir(QDir::current());
         // If fails, likely means it already existed
         // TODO: if another error occurred, handle it
@@ -541,7 +553,7 @@ int main(int argc, char *argv[]) {
         // Process the extracted data next
         for (quint32 i = 0; i < anims.length(); ++i) {
             std::shared_ptr<J2Anim> currentAnim = anims.at(i);
-            AnimMapping mappingForAnim = animMapping->value(qMakePair(currentAnim->set, currentAnim->anim), EMPTY_ANIM_MAPPING);
+            AnimMapping mappingForAnim = animMapping->value(qMakePair(currentAnim->set, currentAnim->anim), IDMapper::EMPTY_ANIM_MAPPING);
 
             // Determine the frame configuration to use.
             // Each asset must fit into a 4096 by 4096 texture,
@@ -602,9 +614,9 @@ int main(int argc, char *argv[]) {
 
             QString verString;
             switch (version) {
-                case JJ2_ORIGINAL: verString = "1.20/.23"; break;
-                case JJ2_TSF:      verString = "1.24"; break;
-                default:           verString = "unknown";
+                case JJ2Version::ORIGINAL: verString = "1.20/.23"; break;
+                case JJ2Version::TSF:      verString = "1.24"; break;
+                default:                   verString = "unknown";
             }
 
             meta.insert("animsVersion", verString);
@@ -656,7 +668,7 @@ int main(int argc, char *argv[]) {
 
             std::cout << "Saving set " << sample->set << " sample " << sample->idInSet << "\n";
 
-            SampleMapping mappingForSample = sampleMapping->value(qMakePair(sample->set, sample->idInSet), EMPTY_SAMPLE_MAPPING);
+            SampleMapping mappingForSample = sampleMapping->value(qMakePair(sample->set, sample->idInSet), IDMapper::EMPTY_SAMPLE_MAPPING);
             QString filename;
             if (mappingForSample.name == "") {
                 filename = "s" + QString::number(sample->set) + "_s" + QString::number(sample->idInSet) + ".wav";
