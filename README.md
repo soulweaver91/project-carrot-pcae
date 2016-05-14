@@ -15,13 +15,14 @@ Version compatibility:
   somewhat different, while sound samples are in a currently unsupported format,
   effectively blocking the process for now.
 * Retail 1.20 (European) - **SUPPORTED**
-* Retail 1.20 (American) - **PARTIALLY SUPPORTED**: Extraction should work,
-  but filename assignments might be wrong. Not tested; help from someone with access
-  to an U.S. copy of the game would be appreciated.
+* Retail 1.20 (American) - **SUPPORTED?**: Based on HH98, the intro differences
+  (Gathering of Developers logo instead of Project Two Interactive) do not
+  affect the contents of the animation library in the end. This has not been
+  tested, though; help from someone with access to an U.S. copy of the game would
+  be appreciated.
 * Patched retail 1.23 (European) - **SUPPORTED**
-* Patched retail 1.23 (American) - **PARTIALLY SUPPORTED**: Same as 1.20.
-* Retail 1.23x (Holiday Hare '98): **UNSUPPORTED**: Resource set differs from both
-  1.23 and 1.24.
+* Patched retail 1.23 (American) - **SUPPORTED?**: Same as 1.20.
+* Retail 1.23x (Holiday Hare '98): **SUPPORTED**
 * Retail 1.24 (The Secret Files) - **SUPPORTED**
 * Retail 1.24x (Christmas Chronicles) - **SUPPORTED**
 

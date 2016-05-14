@@ -19,7 +19,7 @@
 #include <palette.h>
 #include <IDMapping.h>
 
-const std::string PCAE_VERSION = "0.9.5";
+const std::string PCAE_VERSION = "0.9.6";
 
 QByteArray BEfromLE(QByteArray le) {
     QDataStream a(le);
@@ -168,8 +168,9 @@ int main(int argc, char *argv[]) {
             return EXIT_FAILURE;
         }
 
-        // 1.20 JJ2 vanilla, 1.23 JJ2 patched (per docs): 464 bytes
-        // 1.24 JJ2 TSF: 500 bytes
+        // 1.20  JJ2 vanilla, 1.23 JJ2 patched: 464 bytes
+        // 1.23x JJ2 HH: 476 bytes
+        // 1.24  JJ2 TSF: 500 bytes
         qint32 headerLen = uintFromArray(fh.read(4));
 
         qint32 magicUnknown = uintFromArray(fh.read(4));
@@ -531,6 +532,9 @@ int main(int argc, char *argv[]) {
         } else if (headerLen == 500 && !seemsLikeCC) {
             version = JJ2Version::TSF;
             std::cout << "Detected Jazz Jackrabbit 2: The Secret Files.\n";
+        } else if (headerLen == 476) {
+            version = JJ2Version::HH;
+            std::cout << "Detected Jazz Jackrabbit 2: Holiday Hare '98.\n";
         } else {
             version = JJ2Version::UNKNOWN;
             std::cout << "Could not determine the version.\n";
