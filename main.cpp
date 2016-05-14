@@ -19,9 +19,7 @@
 #include <palette.h>
 #include <IDMapping.h>
 
-const std::string PCAE_VERSION = "0.9.4";
-const AnimMapping EMPTY_ANIM_MAPPING = makeAnimMapping("", "");
-const SampleMapping EMPTY_SAMPLE_MAPPING = makeSampleMapping("", "");
+const std::string PCAE_VERSION = "0.9.5";
 
 QByteArray BEfromLE(QByteArray le) {
     QDataStream a(le);
@@ -187,10 +185,12 @@ int main(int argc, char *argv[]) {
                                        : "an unknown version of Jazz Jackrabbit 2")
                   << ".\n";
 
+        auto mapper = std::make_unique<IDMapper>(version);
+
         std::unique_ptr<AnimIDMap> animMapping;
-        animMapping.swap(getAnimMappingForVersion(version));
+        animMapping.swap(mapper->getAnimMapping());
         std::unique_ptr<SampleIDMap> sampleMapping;
-        sampleMapping.swap(getSampleMappingForVersion(version));
+        sampleMapping.swap(mapper->getSampleMapping());
 
         qint32 fileLen = uintFromArray(fh.read(4));
         qint32 crc = uintFromArray(fh.read(4));
@@ -541,7 +541,7 @@ int main(int argc, char *argv[]) {
         // Process the extracted data next
         for (quint32 i = 0; i < anims.length(); ++i) {
             std::shared_ptr<J2Anim> currentAnim = anims.at(i);
-            AnimMapping mappingForAnim = animMapping->value(qMakePair(currentAnim->set, currentAnim->anim), EMPTY_ANIM_MAPPING);
+            AnimMapping mappingForAnim = animMapping->value(qMakePair(currentAnim->set, currentAnim->anim), IDMapper::EMPTY_ANIM_MAPPING);
 
             // Determine the frame configuration to use.
             // Each asset must fit into a 4096 by 4096 texture,
@@ -656,7 +656,7 @@ int main(int argc, char *argv[]) {
 
             std::cout << "Saving set " << sample->set << " sample " << sample->idInSet << "\n";
 
-            SampleMapping mappingForSample = sampleMapping->value(qMakePair(sample->set, sample->idInSet), EMPTY_SAMPLE_MAPPING);
+            SampleMapping mappingForSample = sampleMapping->value(qMakePair(sample->set, sample->idInSet), IDMapper::EMPTY_SAMPLE_MAPPING);
             QString filename;
             if (mappingForSample.name == "") {
                 filename = "s" + QString::number(sample->set) + "_s" + QString::number(sample->idInSet) + ".wav";

@@ -5,24 +5,27 @@
 #include <palette.h>
 #include <IDMapping.h>
 
-SampleMapping makeSampleMapping(std::string first, std::string second) {
+SampleMapping IDMapper::makeSampleMapping(std::string first, std::string second) {
     return SampleMapping(QString::fromStdString(first), QString::fromStdString(second));
 }
 
-AnimMapping makeAnimMapping(std::string first, std::string second, const sf::Color* palette) {
+AnimMapping IDMapper::makeAnimMapping(std::string first, std::string second, const sf::Color* palette) {
     return AnimMapping(QString::fromStdString(first), QString::fromStdString(second), palette);
 }
 
-std::unique_ptr<AnimIDMap> getAnimMappingForVersion(JJ2Version version) {
+const AnimMapping IDMapper::EMPTY_ANIM_MAPPING = makeAnimMapping("", "");
+const SampleMapping IDMapper::EMPTY_SAMPLE_MAPPING = makeSampleMapping("", "");
+
+std::unique_ptr<AnimIDMap> IDMapper::getAnimMapping() {
     auto map = std::make_unique<AnimIDMap>(AnimIDMap());
 
-    if (version == JJ2Version::UNKNOWN) {
+    if (jj2Version == JJ2Version::UNKNOWN) {
         return map;
     }
 
     quint32 offset = 0;
     quint32 offset_local = 0;
-    bool useOffsets = version != JJ2Version::JJ2_TSF;
+    bool useOffsets = jj2Version != JJ2Version::JJ2_TSF;
 
     map->insert(qMakePair(  0,  0), makeAnimMapping("unknown", "flame_blue"));
     map->insert(qMakePair(  0,  1), makeAnimMapping("common", "bomb"));
@@ -1003,10 +1006,10 @@ std::unique_ptr<AnimIDMap> getAnimMappingForVersion(JJ2Version version) {
     return map;
 }
 
-std::unique_ptr<SampleIDMap> getSampleMappingForVersion(JJ2Version version) {
+std::unique_ptr<SampleIDMap> IDMapper::getSampleMapping() {
     auto map = std::make_unique<SampleIDMap>(SampleIDMap());
 
-    if (version == JJ2Version::UNKNOWN) {
+    if (jj2Version == JJ2Version::UNKNOWN) {
         return map;
     }
 
@@ -1019,7 +1022,7 @@ std::unique_ptr<SampleIDMap> getSampleMappingForVersion(JJ2Version version) {
 
     quint32 offset = 0;
     quint32 offset_local = 0;
-    bool useOffsets = version != JJ2Version::JJ2_TSF;
+    bool useOffsets = jj2Version != JJ2Version::JJ2_TSF;
     map->insert(qMakePair(  0,   0), makeSampleMapping("weapon", "bullet_shield_bubble_1"));
     map->insert(qMakePair(  0,   1), makeSampleMapping("weapon", "bullet_shield_bubble_2"));
     map->insert(qMakePair(  0,   2), makeSampleMapping("weapon", "unknown_bmp1"));
@@ -1549,4 +1552,7 @@ std::unique_ptr<SampleIDMap> getSampleMappingForVersion(JJ2Version version) {
     }
 
     return map;
+}
+
+IDMapper::IDMapper(const JJ2Version& version) : jj2Version(version), currentItem(0), currentSet(0) {
 }
