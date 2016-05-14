@@ -157,6 +157,8 @@ int main(int argc, char *argv[]) {
     qint32 filesize = fh.size();
 
     try {
+        bool seemsLikeCC = false;
+
         qint32 magicALIB = uintFromArray(fh.read(4));
         qint32 magicBABE = uintFromArray(fh.read(4));
 
@@ -175,22 +177,6 @@ int main(int argc, char *argv[]) {
             std::cerr << "ERROR: This doesn't look like an Anims.j2a file! (invalid header)\n";
             return EXIT_FAILURE;
         }
-
-        uint version = (headerLen == 464 ? JJ2Version::ORIGINAL :
-                        headerLen == 500 ? JJ2Version::TSF : JJ2Version::UNKNOWN);
-
-        std::cerr << "Based on the header length, this file seems to be from " 
-                  << (headerLen == 464 ? "Jazz Jackrabbit 2" : 
-                      headerLen == 500 ? "Jazz Jackrabbit 2: The Secret Files/Christmas Chronicles"
-                                       : "an unknown version of Jazz Jackrabbit 2")
-                  << ".\n";
-
-        auto mapper = std::make_unique<IDMapper>(version);
-
-        std::unique_ptr<AnimIDMap> animMapping;
-        animMapping.swap(mapper->getAnimMapping());
-        std::unique_ptr<SampleIDMap> sampleMapping;
-        sampleMapping.swap(mapper->getSampleMapping());
 
         qint32 fileLen = uintFromArray(fh.read(4));
         qint32 crc = uintFromArray(fh.read(4));
@@ -281,6 +267,10 @@ int main(int argc, char *argv[]) {
 
                 anims.append(anim);
                 setAnims.append(anim);
+            }
+
+            if (i == 65 && setAnims.length() > 5) {
+                seemsLikeCC = true;
             }
 
             if (frameCount > 0) {
@@ -530,6 +520,28 @@ int main(int argc, char *argv[]) {
         }
 
         fh.close();
+
+        uint version;
+        if (headerLen == 464) {
+            version = JJ2Version::ORIGINAL;
+            std::cout << "Detected Jazz Jackrabbit 2 version 1.20/1.23.\n";
+        } else if (headerLen == 500 && seemsLikeCC) {
+            version = JJ2Version::CC;
+            std::cout << "Detected Jazz Jackrabbit 2: Christmas Chronicles.\n";
+        } else if (headerLen == 500 && !seemsLikeCC) {
+            version = JJ2Version::TSF;
+            std::cout << "Detected Jazz Jackrabbit 2: The Secret Files.\n";
+        } else {
+            version = JJ2Version::UNKNOWN;
+            std::cout << "Could not determine the version.\n";
+        }
+
+        auto mapper = std::make_unique<IDMapper>(version);
+
+        std::unique_ptr<AnimIDMap> animMapping;
+        animMapping.swap(mapper->getAnimMapping());
+        std::unique_ptr<SampleIDMap> sampleMapping;
+        sampleMapping.swap(mapper->getSampleMapping());
 
         QDir outdir(QDir::current());
         // If fails, likely means it already existed

@@ -361,6 +361,7 @@ std::unique_ptr<AnimIDMap> IDMapper::getAnimMapping() {
     addAnimMapping("ui", "font_small");
     addAnimMapping("ui", "font_large");
     addAnimMapping("ui", "logo");
+    addAnimMapping(JJ2Version::CC, "ui", "cc_logo");
     nextSet();
     addAnimMapping("frog", "fall_land");
     addAnimMapping("frog", "hurt");
@@ -633,8 +634,11 @@ std::unique_ptr<AnimIDMap> IDMapper::getAnimMapping() {
     addAnimMapping("ui", "font_medium_2", MENU_PALETTE);
     addAnimMapping("ui", "font_small_2", MENU_PALETTE);
     addAnimMapping("ui", "logo_large", MENU_PALETTE);
-    addAnimMapping(JJ2Version::TSF | JJ2Version::CC, "ui", "expansion_title", MENU_PALETTE);
+    addAnimMapping(JJ2Version::TSF | JJ2Version::CC, "ui", "tsf_title", MENU_PALETTE);
+    addAnimMapping(JJ2Version::CC, "ui", "menu_snow", MENU_PALETTE);
     addAnimMapping("ui", "logo_small", MENU_PALETTE);
+    addAnimMapping(JJ2Version::CC, "ui", "cc_title", MENU_PALETTE);
+    addAnimMapping(JJ2Version::CC, "ui", "cc_title_small", MENU_PALETTE);
     nextSet(2);
     addAnimMapping("monkey", "banana");
     addAnimMapping("monkey", "banana_splat");

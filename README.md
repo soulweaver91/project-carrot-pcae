@@ -21,9 +21,7 @@ Version compatibility:
 * Retail 1.23x (Holiday Hare '98): **UNSUPPORTED**: Resource set differs from both
   1.23 and 1.24.
 * Retail 1.24 (The Secret Files) - **SUPPORTED**
-* Retail 1.24x (Christmas Chronicles) - **SUPPORTED with defects**: Sets 46 and 65
-  currently require amended mappings to TSF due to additional logo art and the snow
-  effect used in the menu. Other sets seem to extract fine.
+* Retail 1.24x (Christmas Chronicles) - **SUPPORTED**
 
 Compatibility may be improved at a later date.
 
