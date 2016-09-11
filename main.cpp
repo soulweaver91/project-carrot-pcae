@@ -19,7 +19,7 @@
 #include <palette.h>
 #include <IDMapping.h>
 
-const std::string PCAE_VERSION = "0.9.6";
+const std::string PCAE_VERSION = "0.9.7";
 
 QByteArray BEfromLE(QByteArray le) {
     QDataStream a(le);
