@@ -22,6 +22,9 @@
     <Filter Include="Documents">
       <UniqueIdentifier>{c33ce225-0a6a-4388-bf54-145c17788f16}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Configuration">
+      <UniqueIdentifier>{1e7b19c8-a23c-4ad6-a226-f4d023ec4802}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -43,11 +46,14 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include=".gitignore">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="README.md">
       <Filter>Documents</Filter>
+    </None>
+    <None Include=".gitattributes">
+      <Filter>Configuration</Filter>
+    </None>
+    <None Include=".gitignore">
+      <Filter>Configuration</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
