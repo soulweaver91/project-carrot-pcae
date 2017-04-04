@@ -542,10 +542,8 @@ int main(int argc, char *argv[]) {
 
         auto mapper = std::make_unique<IDMapper>(version);
 
-        std::unique_ptr<AnimIDMap> animMapping;
-        animMapping.swap(mapper->getAnimMapping());
-        std::unique_ptr<SampleIDMap> sampleMapping;
-        sampleMapping.swap(mapper->getSampleMapping());
+        std::unique_ptr<AnimIDMap> animMapping = mapper->getAnimMapping();
+        std::unique_ptr<SampleIDMap> sampleMapping = mapper->getSampleMapping();
 
         QDir outdir(QDir::current());
         // If fails, likely means it already existed
