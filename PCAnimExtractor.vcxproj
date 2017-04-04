@@ -157,6 +157,8 @@
   <ItemGroup>
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
+    <None Include="PCAnimExtractor.pri" />
+    <None Include="PCAnimExtractor.pro" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>

@@ -55,6 +55,12 @@
     <None Include=".gitignore">
       <Filter>Configuration</Filter>
     </None>
+    <None Include="PCAnimExtractor.pri">
+      <Filter>Configuration</Filter>
+    </None>
+    <None Include="PCAnimExtractor.pro">
+      <Filter>Configuration</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="LICENSE">
