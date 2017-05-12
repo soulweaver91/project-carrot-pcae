@@ -1,3 +1,4 @@
+#include "PCAnimExtractor.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
@@ -16,10 +17,17 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
-#include <palette.h>
-#include <IDMapping.h>
+#include "Palette.h"
+#include "IDMapping.h"
+#include "Version.h"
+#include "Jazz2AnimLib.h"
 
-const std::string PCAE_VERSION = "0.9.7";
+void PCAnimExtractor::convert(const QString& filename, const QDir& outputDir) {
+    Jazz2AnimLib* anim = Jazz2AnimLib::fromFile(filename);
+    //level->printData(std::cout);
+    anim->extractAllResources(outputDir);
+    //printDetailedEventStats(stats);
+}
 
 QByteArray BEfromLE(QByteArray le) {
     QDataStream a(le);
@@ -90,39 +98,6 @@ QByteArray arrayFromUint(quint32 val) {
 
     return a;
 }
-
-struct J2AnimFrame {
-    QPair<quint16, quint16> size;
-    QPair<qint16, qint16> coldspot;
-    QPair<qint16, qint16> hotspot;
-    QPair<qint16, qint16> gunspot;
-    QByteArray imageData;
-    QBitArray maskData;
-    qint32 imageAddr;
-    qint32 maskAddr;
-    bool drawTransparent;
-};
-
-struct J2Anim {
-    quint16 frameCnt;
-    quint16 fps;
-    QVector<J2AnimFrame> frames;
-    quint16 set;
-    quint16 anim;
-    QPair<qint16, qint16> adjustedSize;
-    QPair<qint16, qint16> largestOffset;
-    QPair<qint16, qint16> normalizedHotspot;
-    QPair<qint16, qint16> frameConfiguration;
-};
-
-struct J2Sample {
-    quint16 id;
-    quint16 set;
-    quint16 idInSet;
-    quint32 sampleRate;
-    QByteArray soundData;
-    quint16 multiplier;
-};
 
 QByteArray readBytes(QByteArray& src, quint32 n) {
     QByteArray head = src.left(n);
@@ -195,8 +170,8 @@ int main(int argc, char *argv[]) {
             return EXIT_FAILURE;
         }
 
-        QVector<std::shared_ptr<J2Anim>> anims;
-        QVector<J2Sample> samples;
+        QVector<std::shared_ptr<Jazz2Anim>> anims;
+        QVector<Jazz2Sample> samples;
 
         for (quint32 i = 0; i < setCnt; ++i) {
             std::cout << "Parsing set " << i << "...\n";
@@ -249,10 +224,10 @@ int main(int argc, char *argv[]) {
                 throw 0;
             }
 
-            QVector<std::shared_ptr<J2Anim>> setAnims;
+            QVector<std::shared_ptr<Jazz2Anim>> setAnims;
 
             for (quint16 j = 0; j < animCount; ++j) {
-                std::shared_ptr<J2Anim> anim = std::make_shared<J2Anim>();
+                std::shared_ptr<Jazz2Anim> anim = std::make_shared<Jazz2Anim>();
                 anim->set = i;
                 anim->anim = j;
                 anim->frameCnt = ushortFromArray(readBytes(infoBlock, 2));
@@ -284,7 +259,7 @@ int main(int argc, char *argv[]) {
                 QPair<qint16, qint16> lastGunspot;
                 QPair<qint16, qint16> lastHotspot;
 
-                std::shared_ptr<J2Anim> currentAnim = setAnims.at(0);
+                std::shared_ptr<Jazz2Anim> currentAnim = setAnims.at(0);
                 quint16 currentAnimIdx = 0;
                 quint16 currentFrame = 0;
                 for (quint16 j = 0; j < frameCount; j++) {
@@ -293,7 +268,7 @@ int main(int argc, char *argv[]) {
                         currentFrame = 0;
                     }
 
-                    J2AnimFrame frame;
+                    Jazz2AnimFrame frame;
                     quint16 x, y;
 
                     x = ushortFromArray(readBytes(frameDataBlock, 2));
@@ -366,7 +341,7 @@ int main(int argc, char *argv[]) {
 
                 // Read the image data for each animation frame
                 for (quint16 j = 0; j < setAnims.length(); ++j) {
-                    std::shared_ptr<J2Anim> anim = setAnims.at(j);
+                    std::shared_ptr<Jazz2Anim> anim = setAnims.at(j);
 
                     if (anim->frameCnt < anim->frames.length()) {
                         std::cerr << "ERROR: Set " << anim->set << " anim " << anim->anim << " frame count doesn't match!\n";
@@ -451,8 +426,7 @@ int main(int argc, char *argv[]) {
             }
 
             for (quint16 j = 0; j < sndCount; ++j) {
-                J2Sample sample;
-                sample.id = cumulativeSndIndex + j;
+                Jazz2Sample sample;
                 sample.idInSet = j;
                 sample.set = i;
 
@@ -524,19 +498,19 @@ int main(int argc, char *argv[]) {
 
         uint version;
         if (headerLen == 464) {
-            version = JJ2Version::ORIGINAL;
+            version = Jazz2AnimVersion::ORIGINAL;
             std::cout << "Detected Jazz Jackrabbit 2 version 1.20/1.23.\n";
         } else if (headerLen == 500 && seemsLikeCC) {
-            version = JJ2Version::CC;
+            version = Jazz2AnimVersion::CC;
             std::cout << "Detected Jazz Jackrabbit 2: Christmas Chronicles.\n";
         } else if (headerLen == 500 && !seemsLikeCC) {
-            version = JJ2Version::TSF;
+            version = Jazz2AnimVersion::TSF;
             std::cout << "Detected Jazz Jackrabbit 2: The Secret Files.\n";
         } else if (headerLen == 476) {
-            version = JJ2Version::HH;
+            version = Jazz2AnimVersion::HH;
             std::cout << "Detected Jazz Jackrabbit 2: Holiday Hare '98.\n";
         } else {
-            version = JJ2Version::UNKNOWN;
+            version = Jazz2AnimVersion::UNKNOWN;
             std::cout << "Could not determine the version.\n";
         }
 
@@ -554,7 +528,7 @@ int main(int argc, char *argv[]) {
 
         // Process the extracted data next
         for (quint32 i = 0; i < anims.length(); ++i) {
-            std::shared_ptr<J2Anim> currentAnim = anims.at(i);
+            std::shared_ptr<Jazz2Anim> currentAnim = anims.at(i);
             AnimMapping mappingForAnim = animMapping->value(qMakePair(currentAnim->set, currentAnim->anim), IDMapper::EMPTY_ANIM_MAPPING);
 
             // Determine the frame configuration to use.
@@ -578,7 +552,7 @@ int main(int argc, char *argv[]) {
                         currentAnim->adjustedSize.second * currentAnim->frameConfiguration.second, sf::Color(0, 0, 0, 0));
 
             for (int j = 0; j < currentAnim->frames.length(); ++j) {
-                J2AnimFrame* frame = &currentAnim->frames[j];
+                Jazz2AnimFrame* frame = &currentAnim->frames[j];
                 quint32 offsetX = currentAnim->normalizedHotspot.first  + frame->hotspot.first;
                 quint32 offsetY = currentAnim->normalizedHotspot.second + frame->hotspot.second;
 
@@ -616,8 +590,8 @@ int main(int argc, char *argv[]) {
 
             QString verString;
             switch (version) {
-                case JJ2Version::ORIGINAL: verString = "1.20/.23"; break;
-                case JJ2Version::TSF:      verString = "1.24"; break;
+                case Jazz2AnimVersion::ORIGINAL: verString = "1.20/.23"; break;
+                case Jazz2AnimVersion::TSF:      verString = "1.24"; break;
                 default:                   verString = "unknown";
             }
 
@@ -666,7 +640,7 @@ int main(int argc, char *argv[]) {
 
         for (quint32 i = 0; i < samples.length(); ++i) {
             //const J2Sample* sample = &samples.at(i);
-            J2Sample* sample = &samples[i];
+            Jazz2Sample* sample = &samples[i];
 
             std::cout << "Saving set " << sample->set << " sample " << sample->idInSet << "\n";
 

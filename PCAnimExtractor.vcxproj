@@ -146,13 +146,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="IDMapping.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\IDMapping.cpp" />
+    <ClCompile Include="src\Jazz2AnimLib.cpp" />
+    <ClCompile Include="src\Jazz2FormatDataBlock.cpp" />
+    <ClCompile Include="src\Jazz2FormatParseException.cpp" />
+    <ClCompile Include="src\PCAnimExtractor.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="IDMapping.h" />
-    <ClInclude Include="palette.h" />
-    <ClInclude Include="version.h" />
+    <ClInclude Include="src\IDMapping.h" />
+    <ClInclude Include="src\Jazz2FormatDataBlock.h" />
+    <ClInclude Include="src\Jazz2FormatParseException.h" />
+    <ClInclude Include="src\Palette.h" />
+    <ClInclude Include="src\Jazz2AnimLib.h" />
+    <ClInclude Include="src\PCAnimExtractor.h" />
+    <ClInclude Include="src\Version.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitattributes" />
@@ -163,6 +170,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="LICENSE" />
+    <Text Include="LICENSE-THIRD-PARTY" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

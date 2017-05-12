@@ -3,7 +3,7 @@
 #include <QMap>
 #include <QPair>
 #include <QString>
-#include <version.h>
+#include "Jazz2AnimLib.h"
 
 typedef QPair<quint32, quint32> SetResourcePair;
 typedef QPair<QString, QString> ResourceMappingPair;
@@ -47,7 +47,7 @@ private:
     static AnimMapping makeAnimMapping(const std::string& first, const std::string& second, const sf::Color* palette = SPRITE_PALETTE);
     const uint jj2Version;
 
-    void nextSet(const int advanceBy = 1, const uint appliesTo = JJ2Version::ALL);
+    void nextSet(const int advanceBy = 1, const uint appliesTo = Jazz2AnimVersion::ALL);
     void addAnimMapping(const uint appliesTo, const std::string& first, const std::string& second, const sf::Color* palette = SPRITE_PALETTE);
     void addAnimMapping(const std::string& first, const std::string& second, const sf::Color* palette = SPRITE_PALETTE);
     void addSampleMapping(const uint appliesTo, const std::string& first, const std::string& second);
