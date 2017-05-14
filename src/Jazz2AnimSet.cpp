@@ -39,7 +39,7 @@ Jazz2AnimSet::Jazz2AnimSet(quint16 number, Jazz2FormatDataBlock& data) : number(
     readSamples(sampleCount, sampleDataBlock);
 }
 
-void Jazz2AnimSet::writeAssetsToRawFiles(const QDir& outDir, std::shared_ptr<AnimIDMap> animMapping, std::shared_ptr<SampleIDMap> sampleMapping, Jazz2AnimVersion version) {
+void Jazz2AnimSet::writeAssetsToRawFiles(const QDir& outDir, std::shared_ptr<AnimIDMap> animMapping, std::shared_ptr<SampleIDMap> sampleMapping, Jazz2AnimVersion version, std::ostream& progressOutput) {
     for (auto& anim : animations) {
         AnimMapping mappingForAnim = IDMapper::EMPTY_ANIM_MAPPING;
         if (animMapping->length() > number && animMapping->at(number).length() > anim.number) {
@@ -57,8 +57,8 @@ void Jazz2AnimSet::writeAssetsToRawFiles(const QDir& outDir, std::shared_ptr<Ani
         }
 
         anim.adjustSize();
-        anim.writeImageFile(outDir.absoluteFilePath(filename), mappingForAnim.palette);
-        anim.writeMetaJsonFile(outDir.absoluteFilePath(filename + ".json"), number, version);
+        anim.writeImageFile(outDir, outDir.absoluteFilePath(filename), number, mappingForAnim.palette, progressOutput);
+        anim.writeMetaJsonFile(outDir, outDir.absoluteFilePath(filename + ".json"), number, version, progressOutput);
     }
 
     for (auto& sample : audioSamples) {
@@ -78,7 +78,7 @@ void Jazz2AnimSet::writeAssetsToRawFiles(const QDir& outDir, std::shared_ptr<Ani
         }
 
 
-        sample.writeAsWavFile(outDir.absoluteFilePath(filename));
+        sample.writeAsWavFile(outDir, outDir.absoluteFilePath(filename), number, progressOutput);
     }
 }
 

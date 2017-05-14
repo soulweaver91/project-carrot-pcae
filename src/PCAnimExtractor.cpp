@@ -19,9 +19,7 @@
 
 void PCAnimExtractor::extract(const QString& filename, const QDir& outputDir) {
     Jazz2AnimLib* anim = Jazz2AnimLib::fromFile(filename);
-    //level->printData(std::cout);
-    anim->extractAllResources(outputDir);
-    //printDetailedEventStats(stats);
+    anim->extractAllResources(outputDir, std::cout);
 }
 
 int main(int argc, char *argv[]) {

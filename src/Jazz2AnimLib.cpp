@@ -29,12 +29,46 @@ Jazz2AnimLib* Jazz2AnimLib::fromFile(const QString& filename, bool strictParser)
     return lib;
 }
 
-void Jazz2AnimLib::extractAllResources(const QDir& directory) {
+void Jazz2AnimLib::extractAllResources(const QDir& directory, std::ostream& progressOutput) {
+    progressOutput << "Detected as Anims.j2a for Jazz Jackrabbit 2";
+    switch (version) {
+        case Jazz2AnimVersion::ORIGINAL:
+            progressOutput << " (1.20-1.23)";
+            break;
+        case Jazz2AnimVersion::HH:
+            progressOutput << " Holiday Hare (1.23x)";
+            break;
+        case Jazz2AnimVersion::TSF:
+            progressOutput << ": The Secret Files (1.24)";
+            break;
+        case Jazz2AnimVersion::CC:
+            progressOutput << " Christmas Chronicles (1.24x)";
+            break;
+    }
+    progressOutput << ".\n";
+
+    uint i = 0;
+    uint animCount = 0;
+    uint sampleCount = 0;
+    for (auto set : sets) {
+        uint anims = set->getAnimations()->length();
+        uint samples = set->getSamples()->length();
+        progressOutput << " Set " << QString::number(i).rightJustified(3).toStdString() << ": "
+            << QString::number(anims).rightJustified(4).toStdString() << " anims and "
+            << QString::number(samples).rightJustified(4).toStdString() << " samples.\n";
+        ++i;
+        animCount += anims;
+        sampleCount += samples;
+    }
+    progressOutput << "In total, "
+        << QString::number(animCount).rightJustified(4).toStdString() << " anims and "
+        << QString::number(sampleCount).rightJustified(4).toStdString() << " samples.\n\n";
+
     std::shared_ptr<AnimIDMap> animMapping = IDMapper::getAnimMap(version);
     std::shared_ptr<SampleIDMap> sampleMapping = IDMapper::getSampleMap(version);
 
     for (auto& set : sets) {
-        set->writeAssetsToRawFiles(directory, animMapping, sampleMapping, version);
+        set->writeAssetsToRawFiles(directory, animMapping, sampleMapping, version, progressOutput);
     }
 }
 

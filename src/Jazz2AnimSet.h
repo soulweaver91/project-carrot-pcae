@@ -1,4 +1,6 @@
 #pragma once
+#include <iostream>
+
 #include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
@@ -61,7 +63,7 @@ struct Jazz2Anim {
         }
     }
 
-    void writeImageFile(const QString& filename, const sf::Color palette[256]) const {
+    void writeImageFile(const QDir& outDir, const QString& filename, quint16 set, const sf::Color palette[256], std::ostream& progressOutput) const {
         sf::Image img;
         img.create(adjustedSize.first * frameConfiguration.first,
                    adjustedSize.second * frameConfiguration.second, sf::Color(0, 0, 0, 0));
@@ -87,8 +89,19 @@ struct Jazz2Anim {
         }
 
         img.saveToFile(filename.toStdString());
+        QFileInfo writtenFileData(filename);
+        progressOutput << " << " << outDir.relativeFilePath(filename).leftJustified(60).toStdString()
+            << " Set " << QString::number(set).rightJustified(3).toStdString()
+            << " anim   " << QString::number(number).rightJustified(3).toStdString()
+            << ", " << QString::number(writtenFileData.size()).rightJustified(6).toStdString() << " bytes"
+            << ", " << QString::number(img.getSize().x).rightJustified(3).toStdString()
+            << "x"  << QString::number(img.getSize().y).leftJustified(3).toStdString()
+            << " PNG, "  << QString::number(frameCnt).rightJustified(3).toStdString() << " frames of " 
+            << QString::number(adjustedSize.first).rightJustified(3).toStdString()
+            << "x" << QString::number(adjustedSize.second).leftJustified(3).toStdString() << " @ "
+            << QString::number(fps).rightJustified(2).toStdString() << "FPS\n";
     }
-    void writeMetaJsonFile(const QString& filename, quint16 set, Jazz2AnimVersion version) const {
+    void writeMetaJsonFile(const QDir& outDir, const QString& filename, quint16 set, Jazz2AnimVersion version, std::ostream& progressOutput) const {
         QJsonObject meta;
         meta.insert("description", "Set " + QString::number(set) + " anim " + QString::number(number));
         meta.insert("generator", "Project Carrot Anim Extractor v" + QString::fromStdString(PCAE_VERSION));
@@ -141,6 +154,13 @@ struct Jazz2Anim {
 
         jsonfh.write(doc.toJson());
         jsonfh.close();
+
+        QFileInfo writtenFileData(filename);
+        progressOutput << " << " << outDir.relativeFilePath(filename).leftJustified(60).toStdString()
+            << " Set " << QString::number(set).rightJustified(3).toStdString()
+            << " anim   " << QString::number(number).rightJustified(3).toStdString()
+            << ", " << QString::number(writtenFileData.size()).rightJustified(6).toStdString() << " bytes"
+            << ",        JSON\n";
     }
 };
 
@@ -151,7 +171,7 @@ struct Jazz2Sample {
     QByteArray soundData;
     quint16 multiplier;
 
-    void writeAsWavFile(const QString& filename) const {
+    void writeAsWavFile(const QDir& outDir, const QString& filename, quint16 set, std::ostream& progressOutput) const {
         QFile waveFile(filename);
         if (!(waveFile.open(QIODevice::ReadWrite))) {
             throw Jazz2FormatParseException(FILE_CANNOT_BE_OPENED, { filename });
@@ -194,13 +214,19 @@ struct Jazz2Sample {
         stream.writeRawData(transformedData.data(), transformedData.size());
 
         waveFile.close();
+        progressOutput << " << " << outDir.relativeFilePath(filename).leftJustified(60).toStdString()
+            << " Set " << QString::number(set).rightJustified(3).toStdString()
+            << " sample " << QString::number(number).rightJustified(3).toStdString()
+            << ", " << QString::number(soundData.length() + 44).rightJustified(6).toStdString() << " bytes"
+            << ",  " << QString::number(effectiveMultiplier * 8).rightJustified(2).toStdString() << "-bit WAV @ "
+            << QString::number(sampleRate).rightJustified(5).toStdString() << "Hz\n";
     }
 };
 
 class Jazz2AnimSet {
 public:
     Jazz2AnimSet(quint16 number, Jazz2FormatDataBlock& data);
-    void writeAssetsToRawFiles(const QDir& outDir, std::shared_ptr<AnimIDMap> animMapping, std::shared_ptr<SampleIDMap> sampleMapping, Jazz2AnimVersion version);
+    void writeAssetsToRawFiles(const QDir& outDir, std::shared_ptr<AnimIDMap> animMapping, std::shared_ptr<SampleIDMap> sampleMapping, Jazz2AnimVersion version, std::ostream& progressOutput);
     const QVector<Jazz2Anim>* getAnimations() const;
     const QVector<Jazz2Sample>* getSamples() const;
 

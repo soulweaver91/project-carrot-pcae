@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <iostream>
 
 #include <QString>
 #include <QVector>
@@ -23,7 +24,7 @@ class Jazz2AnimLib {
 public:
     Jazz2AnimLib();
     static Jazz2AnimLib* fromFile(const QString& filename, bool strictParser = false);
-    void extractAllResources(const QDir& directory);
+    void extractAllResources(const QDir& directory, std::ostream& progressOutput);
 
 private:
     QVector<quint32> setAddresses;
