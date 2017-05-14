@@ -48,7 +48,7 @@ QByteArray Jazz2FormatDataBlock::readRawBytes(int n) {
     return buffer;
 }
 
-QByteArray* const Jazz2FormatDataBlock::getRawData() {
+const QByteArray* Jazz2FormatDataBlock::getRawData() {
     return &data;
 }
 

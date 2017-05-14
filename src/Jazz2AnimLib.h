@@ -10,12 +10,10 @@
 #include "Jazz2FormatDataBlock.h"
 
 enum Jazz2AnimVersion {
-    ORIGINAL = 0x00000001,
-    TSF      = 0x00000002,
-    CC       = 0x00000004,
-    HH       = 0x00000008,
-    ALL      = 0xFFFFFFFF,
-    UNKNOWN  = 0x00000000
+    ORIGINAL,
+    TSF,
+    CC,
+    HH
 };
 
 class Jazz2AnimSet;

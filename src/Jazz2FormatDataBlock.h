@@ -17,7 +17,7 @@ public:
     void discardBytes(int n);
     void clear();
     int length();
-    QByteArray* const getRawData();
+    const QByteArray* getRawData();
 
 private:
     QByteArray data;

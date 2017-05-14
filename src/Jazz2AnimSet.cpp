@@ -30,7 +30,7 @@ Jazz2AnimSet::Jazz2AnimSet(quint16 number, Jazz2FormatDataBlock& data) : number(
     Jazz2FormatDataBlock frameDataBlock (data.readRawBytes(frameDataBlockPackedSize ), true, frameDataBlockUnpackedSize , 1);
     Jazz2FormatDataBlock imageDataBlock (data.readRawBytes(imageDataBlockPackedSize ), true, imageDataBlockUnpackedSize , 2);
     Jazz2FormatDataBlock sampleDataBlock(data.readRawBytes(sampleDataBlockPackedSize), true, sampleDataBlockUnpackedSize, 3);
-    QByteArray* rawImageData = imageDataBlock.getRawData();
+    const QByteArray* rawImageData = imageDataBlock.getRawData();
 
     animations.reserve(animCount);
     audioSamples.reserve(sampleCount);
@@ -277,7 +277,7 @@ void Jazz2AnimSet::readSamples(quint8 sampleCount, Jazz2FormatDataBlock& sampleD
             throw Jazz2FormatParseException(INVALID_MAGIC);
         }
 
-        if (sample.soundData.length() < actualDataSize) {
+        if (sample.soundData.length() < (int)actualDataSize) {
             throw Jazz2FormatParseException(UNEXPECTED_FILE_LENGTH);
         }
 
