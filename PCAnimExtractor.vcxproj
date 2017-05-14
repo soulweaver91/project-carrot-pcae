@@ -148,12 +148,14 @@
   <ItemGroup>
     <ClCompile Include="src\IDMapping.cpp" />
     <ClCompile Include="src\Jazz2AnimLib.cpp" />
+    <ClCompile Include="src\Jazz2AnimSet.cpp" />
     <ClCompile Include="src\Jazz2FormatDataBlock.cpp" />
     <ClCompile Include="src\Jazz2FormatParseException.cpp" />
     <ClCompile Include="src\PCAnimExtractor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\IDMapping.h" />
+    <ClInclude Include="src\Jazz2AnimSet.h" />
     <ClInclude Include="src\Jazz2FormatDataBlock.h" />
     <ClInclude Include="src\Jazz2FormatParseException.h" />
     <ClInclude Include="src\Palette.h" />

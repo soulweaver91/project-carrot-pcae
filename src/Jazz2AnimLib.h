@@ -1,10 +1,11 @@
 #pragma once
+#include <memory>
+
 #include <QString>
 #include <QVector>
-#include <QPair>
 #include <QByteArray>
-#include <QBitArray>
 #include <QDir>
+
 #include "Jazz2FormatDataBlock.h"
 
 enum Jazz2AnimVersion {
@@ -16,41 +17,7 @@ enum Jazz2AnimVersion {
     UNKNOWN  = 0x00000000
 };
 
-struct Jazz2AnimFrame {
-    QPair<quint16, quint16> size;
-    QPair<qint16, qint16> coldspot;
-    QPair<qint16, qint16> hotspot;
-    QPair<qint16, qint16> gunspot;
-    QByteArray imageData;
-    QBitArray maskData;
-    qint32 imageAddr;
-    qint32 maskAddr;
-    bool drawTransparent;
-};
-
-struct Jazz2Anim {
-    quint16 set;
-    quint16 anim;
-
-    quint16 frameCnt;
-    quint16 fps;
-
-    QVector<Jazz2AnimFrame> frames;
-
-    QPair<qint16, qint16> adjustedSize;
-    QPair<qint16, qint16> largestOffset;
-    QPair<qint16, qint16> normalizedHotspot;
-    QPair<qint16, qint16> frameConfiguration;
-};
-
-struct Jazz2Sample {
-    quint16 set;
-    quint16 idInSet;
-
-    quint32 sampleRate;
-    QByteArray soundData;
-    quint16 multiplier;
-};
+class Jazz2AnimSet;
 
 class Jazz2AnimLib {
 public:
@@ -59,13 +26,15 @@ public:
     void extractAllResources(const QDir& directory);
 
 private:
-    QVector<Jazz2Anim> animations;
-    QVector<Jazz2Sample> audioSamples;
+    QVector<quint32> setAddresses;
+    QVector<std::shared_ptr<Jazz2AnimSet>> sets;
 
     Jazz2AnimVersion version;
+    quint32 headerLength;
 
     // Parser utility functions
-    Jazz2AnimLib(Jazz2FormatDataBlock& header, quint32 fileLength, bool strictParser);
+    Jazz2AnimLib(Jazz2FormatDataBlock& header, QFile& fileHandle, quint32 fileLength, bool strictParser);
+    void loadSets(QByteArray& rawData);
 
     // PC file writing functions
 };

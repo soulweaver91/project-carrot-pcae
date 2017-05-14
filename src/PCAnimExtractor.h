@@ -4,5 +4,5 @@
 
 class PCAnimExtractor {
 public:
-    static void convert(const QString& filename, const QDir& outputDir);
+    static void extract(const QString& filename, const QDir& outputDir);
 };

@@ -6,7 +6,7 @@ Jazz2FormatDataBlock::Jazz2FormatDataBlock(QByteArray originalData, bool compres
     if (compressed) {
         data = qUncompress(convertQUintToByteArray(len) + originalData);
 
-        if (data.size() == 0) {
+        if (data.size() == 0 && len != 0) {
             throw Jazz2FormatParseException(BLOCK_DECOMPRESSION_FAILED, { idx });
         }
     } else {
@@ -46,6 +46,10 @@ QByteArray Jazz2FormatDataBlock::readRawBytes(int n) {
     delete[] raw;
 
     return buffer;
+}
+
+QByteArray* const Jazz2FormatDataBlock::getRawData() {
+    return &data;
 }
 
 void Jazz2FormatDataBlock::discardBytes(int n) {

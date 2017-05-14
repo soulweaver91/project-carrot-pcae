@@ -42,6 +42,9 @@
     <ClCompile Include="src\Jazz2FormatParseException.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Jazz2AnimSet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\IDMapping.h">
@@ -63,6 +66,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Palette.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Jazz2AnimSet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -30,6 +30,12 @@ QString Jazz2FormatParseException::friendlyText() {
         case BLOCK_DECOMPRESSION_FAILED:
             return "Data block " + getInfo().at(0).toString() + " could not be uncompressed!";
             break;
+        case ASSET_FOLDER_CREATION_FAILED:
+            return "Could not create the asset folder!";
+            break;
+        case HEADER_SET_LENGTH_MISMATCH:
+            return "Header length did not match with the number of sets in the library!";
+            break;
         default:
             return "Unknown error!";
     }

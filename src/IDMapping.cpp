@@ -2,7 +2,7 @@
 #include <QMap>
 #include <QString>
 #include "Jazz2AnimLib.h"
-#include "palette.h"
+#include "Palette.h"
 #include "IDMapping.h"
 
 SampleMapping IDMapper::makeSampleMapping(const std::string& first, const std::string& second) {
@@ -45,9 +45,9 @@ void IDMapper::addSampleMapping(const std::string& first, const std::string& sec
 const AnimMapping IDMapper::EMPTY_ANIM_MAPPING = makeAnimMapping("", "");
 const SampleMapping IDMapper::EMPTY_SAMPLE_MAPPING = makeSampleMapping("", "");
 
-std::unique_ptr<AnimIDMap> IDMapper::getAnimMapping() {
-    wipAnimMap = std::make_unique<AnimIDMap>();
-    std::unique_ptr<AnimIDMap> moved;
+std::shared_ptr<AnimIDMap> IDMapper::getAnimMapping() {
+    wipAnimMap = std::make_shared<AnimIDMap>();
+    std::shared_ptr<AnimIDMap> moved;
     currentItem = 0;
     currentSet = 0;
 
@@ -1062,9 +1062,9 @@ std::unique_ptr<AnimIDMap> IDMapper::getAnimMapping() {
     return moved;
 }
 
-std::unique_ptr<SampleIDMap> IDMapper::getSampleMapping() {
-    wipSampleMap = std::make_unique<SampleIDMap>();
-    std::unique_ptr<SampleIDMap> moved;
+std::shared_ptr<SampleIDMap> IDMapper::getSampleMapping() {
+    wipSampleMap = std::make_shared<SampleIDMap>();
+    std::shared_ptr<SampleIDMap> moved;
     currentItem = 0;
     currentSet = 0;
 

@@ -3,7 +3,9 @@
 #include <QMap>
 #include <QPair>
 #include <QString>
+
 #include "Jazz2AnimLib.h"
+#include "Palette.h"
 
 typedef QPair<quint32, quint32> SetResourcePair;
 typedef QPair<QString, QString> ResourceMappingPair;
@@ -36,8 +38,8 @@ typedef QMap<SetResourcePair, SampleMapping> SampleIDMap;
 class IDMapper {
 public:
     IDMapper(const uint& version);
-    std::unique_ptr<AnimIDMap> getAnimMapping();
-    std::unique_ptr<SampleIDMap> getSampleMapping();
+    std::shared_ptr<AnimIDMap> getAnimMapping();
+    std::shared_ptr<SampleIDMap> getSampleMapping();
 
     static const AnimMapping EMPTY_ANIM_MAPPING;
     static const SampleMapping EMPTY_SAMPLE_MAPPING;
@@ -56,6 +58,6 @@ private:
     // Internal state, used in the sample mapping maker functions
     int currentSet;
     int currentItem;
-    std::unique_ptr<AnimIDMap> wipAnimMap;
-    std::unique_ptr<SampleIDMap> wipSampleMap;
+    std::shared_ptr<AnimIDMap> wipAnimMap;
+    std::shared_ptr<SampleIDMap> wipSampleMap;
 };
