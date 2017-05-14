@@ -41,14 +41,31 @@ mapping are saved to the asset folder root.
 
 ## Development
 
-Compiling requires [SFML 2.x](http://www.sfml-dev.org/download.php),
-[Qt 5.x](http://www.qt.io/download/) and Microsoft Visual Studio 2015.
-Configure the Qt settings with the MSVS Qt 5 plugin, then set up the macro
-`SFML_DIR` in the user property sheets (`Microsoft.Cpp.Win32.user` and 
-`Microsoft.Cpp.x64.user`) to point to the location of your SFML installation.
+Compiling requires [Qt 5.x](http://www.qt.io/download/) and [SFML 2.x](http://www.sfml-dev.org/download.php).
 
-MSVS is not strictly required as long as you know how to set up a build
-system manually, though.
+### Windows
+
+To build with Visual Studio 2015, configure the Qt settings with the MSVS Qt 5 plugin first.
+
+MSVS is not strictly required for building, but you're on your own if you prefer using some other
+compiler for building on Windows.
+
+### Linux
+
+First set up the environment as instructed in the repository for
+[Project Carrot](https://github.com/soulweaver91/project-carrot), clone this project
+to a folder, navigate to it, and:
+
+```shell
+qmake -spec linux-clang
+make release
+```
+
+This will build the executable to `Release/PCLevelConverter`.
+
+### macOS
+
+Follow the Linux instructions, but use `macx-clang` as the spec instead.
 
 ## License
 This software is licensed under the [MIT License](https://opensource.org/licenses/MIT).

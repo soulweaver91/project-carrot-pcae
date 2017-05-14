@@ -27,21 +27,48 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="src\IDMapping.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="IDMapping.cpp">
+    <ClCompile Include="src\PCAnimExtractor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Jazz2AnimLib.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Jazz2FormatDataBlock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Jazz2FormatParseException.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Jazz2AnimSet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="palette.h">
+    <ClInclude Include="src\IDMapping.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="version.h">
+    <ClInclude Include="src\Jazz2AnimLib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IDMapping.h">
+    <ClInclude Include="src\Version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PCAnimExtractor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Jazz2FormatDataBlock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Jazz2FormatParseException.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Palette.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Jazz2AnimSet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -55,9 +82,18 @@
     <None Include=".gitignore">
       <Filter>Configuration</Filter>
     </None>
+    <None Include="PCAnimExtractor.pri">
+      <Filter>Configuration</Filter>
+    </None>
+    <None Include="PCAnimExtractor.pro">
+      <Filter>Configuration</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="LICENSE">
+      <Filter>Documents</Filter>
+    </Text>
+    <Text Include="LICENSE-THIRD-PARTY">
       <Filter>Documents</Filter>
     </Text>
   </ItemGroup>
