@@ -61,7 +61,7 @@ qmake -spec linux-clang
 make release
 ```
 
-This will build the executable to `Release/PCLevelConverter`.
+This will build the executable to `Release/PCAnimExtractor`.
 
 ### macOS
 
