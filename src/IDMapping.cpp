@@ -5,1658 +5,1770 @@
 #include "Palette.h"
 #include "IDMapping.h"
 
-SampleMapping IDMapper::makeSampleMapping(const std::string& first, const std::string& second) {
-    return SampleMapping(QString::fromStdString(first), QString::fromStdString(second));
-}
-
-AnimMapping IDMapper::makeAnimMapping(const std::string& first, const std::string& second, const sf::Color* palette) {
-    return AnimMapping(QString::fromStdString(first), QString::fromStdString(second), palette);
-}
-
-void IDMapper::nextSet(int advanceBy, uint appliesTo) {
-    if ((jj2Version & appliesTo) > 0) {
-        currentSet += advanceBy;
-        currentItem = 0;
+std::shared_ptr<AnimIDMap> IDMapper::getAnimMap(Jazz2AnimVersion version) {
+    std::shared_ptr<AnimIDMap> map = std::make_shared<AnimIDMap>(BASE_GAME_ANIM_MAP);
+    
+    // Go backwards, adding and removing assets that are different between versions.
+    // This order makes it easier to keep track of the exact positions.
+    if (version == Jazz2AnimVersion::TSF || version == Jazz2AnimVersion::CC) {
+        map->append({
+            {
+                { "doggy", "xmas_attack" },
+                { "doggy", "xmas_walk" }
+            }, {
+                { "sparks", "ghost_idle" }
+            }
+        });
     }
-}
-
-void IDMapper::addAnimMapping(const uint appliesTo, const std::string& first, const std::string& second, const sf::Color* palette) {
-    if ((jj2Version & appliesTo) > 0) {
-        wipAnimMap->insert(qMakePair(currentSet, currentItem), makeAnimMapping(first, second, palette));
-        currentItem++;
+    if (version == Jazz2AnimVersion::HH || version == Jazz2AnimVersion::TSF || version == Jazz2AnimVersion::CC) {
+        map->insert(109, {
+            { "bilsy", "xmas_throw_fireball" },
+            { "bilsy", "xmas_appear" },
+            { "bilsy", "xmas_vanish" },
+            { "bilsy", "xmas_bullet_fireball" },
+            { "bilsy", "xmas_idle" }
+        });
+        map->insert(110, {
+            { "lizard", "xmas_copter_attack" },
+            { "lizard", "xmas_bomb" },
+            { "lizard", "xmas_copter_idle" },
+            { "lizard", "xmas_copter" },
+            { "lizard", "xmas_walk" }
+        });
+        map->insert(111, {
+            { "turtle", "xmas_attack" },
+            { "turtle", "xmas_idle_flavor" },
+            { "turtle", "xmas_turn_start" },
+            { "turtle", "xmas_turn_end" },
+            { "turtle", "xmas_shell_reverse" },
+            { "turtle", "xmas_shell" },
+            { "turtle", "xmas_idle" },
+            { "turtle", "xmas_walk" }
+        });
     }
-}
-
-void IDMapper::addAnimMapping(const std::string& first, const std::string& second, const sf::Color* palette) {
-    addAnimMapping(Jazz2AnimVersion::ALL, first, second, palette);
-}
-
-void IDMapper::addSampleMapping(const uint appliesTo, const std::string& first, const std::string& second) {
-    if ((jj2Version & appliesTo) > 0) {
-        wipSampleMap->insert(qMakePair(currentSet, currentItem), makeSampleMapping(first, second));
-        currentItem++;
+    if (version == Jazz2AnimVersion::TSF || version == Jazz2AnimVersion::CC) {
+        auto spazItems = &(*(map.get()))[85];
+        spazItems->remove(93, 11);
+        spazItems->remove(69);
+        spazItems->remove(64, 3);
+        spazItems->remove(62);
+        spazItems->remove(48, 7);
+        spazItems->remove(20);
+        spazItems->remove(10);
+        spazItems->insert(8, { "spaz", "crouch" });
+        spazItems->remove(7);
+        spazItems->remove(0);
     }
-}
-
-void IDMapper::addSampleMapping(const std::string& first, const std::string& second) {
-    addSampleMapping(Jazz2AnimVersion::ALL, first, second);
-}
-
-const AnimMapping IDMapper::EMPTY_ANIM_MAPPING = makeAnimMapping("", "");
-const SampleMapping IDMapper::EMPTY_SAMPLE_MAPPING = makeSampleMapping("", "");
-
-std::shared_ptr<AnimIDMap> IDMapper::getAnimMapping() {
-    wipAnimMap = std::make_shared<AnimIDMap>();
-    std::shared_ptr<AnimIDMap> moved;
-    currentItem = 0;
-    currentSet = 0;
-
-    if (jj2Version == Jazz2AnimVersion::UNKNOWN) {
-        moved.swap(wipAnimMap);
-        return moved;
+    if (version == Jazz2AnimVersion::CC) {
+        auto uiItems = &(*(map.get()))[61];
+        uiItems->append({
+            { "ui", "cc_title", MENU_PALETTE },
+            { "ui", "cc_title_small", MENU_PALETTE }
+        });
+        uiItems->insert(3, { "ui", "menu_snow", MENU_PALETTE });
     }
+    if (version == Jazz2AnimVersion::TSF || version == Jazz2AnimVersion::CC) {
+        auto section = &(*(map.get()))[61];
+        section->insert(3, { "ui", "tsf_title", MENU_PALETTE });
 
-    // set 0 (all)
-    addAnimMapping("unknown", "flame_blue");
-    addAnimMapping("common", "bomb");
-    addAnimMapping("common", "smoke_poof");
-    addAnimMapping("common", "explosion_rf");
-    addAnimMapping("common", "explosion_small");
-    addAnimMapping("common", "explosion_large");
-    addAnimMapping("common", "smoke_circling_gray");
-    addAnimMapping("common", "smoke_circling_brown");
-    addAnimMapping("unknown", "bubble");
-    addAnimMapping("unknown", "brown_thing");
-    addAnimMapping("common", "explosion_pepper");
-    addAnimMapping("unknown", "bullet_maybe_electro");
-    addAnimMapping("unknown", "bullet_maybe_electro_trail");
-    addAnimMapping("unknown", "flame_red");
-    addAnimMapping("weapon", "bullet_shield_fireball");
-    addAnimMapping("unknown", "flare_diag_downleft");
-    addAnimMapping("unknown", "flare_hor");
-    addAnimMapping("weapon", "bullet_blaster_upgraded_hor");
-    addAnimMapping("ui", "blaster_upgraded_jazz");
-    addAnimMapping("ui", "blaster_upgraded_spaz");
-    addAnimMapping("weapon", "bullet_blaster_hor");
-    addAnimMapping("weapon", "bullet_blaster_upgraded_ver");
-    addAnimMapping("weapon", "bullet_blaster_ver");
-    addAnimMapping("weapon", "bullet_bouncer");
-    addAnimMapping("pickup", "ammo_bouncer_upgraded");
-    addAnimMapping("pickup", "ammo_bouncer");
-    addAnimMapping("weapon", "bullet_bouncer_upgraded");
-    addAnimMapping("weapon", "bullet_freezer_hor");
-    addAnimMapping("pickup", "ammo_freezer_upgraded");
-    addAnimMapping("pickup", "ammo_freezer");
-    addAnimMapping("weapon", "bullet_freezer_upgraded_hor");
-    addAnimMapping("weapon", "bullet_freezer_ver");
-    addAnimMapping("weapon", "bullet_freezer_upgraded_ver");
-    addAnimMapping("pickup", "ammo_seeker_upgraded");
-    addAnimMapping("pickup", "ammo_seeker");
-    addAnimMapping("weapon", "bullet_seeker_ver_down");
-    addAnimMapping("weapon", "bullet_seeker_diag_downright");
-    addAnimMapping("weapon", "bullet_seeker_hor");
-    addAnimMapping("weapon", "bullet_seeker_ver_up");
-    addAnimMapping("weapon", "bullet_seeker_diag_upright");
-    addAnimMapping("weapon", "bullet_seeker_upgraded_ver_down");
-    addAnimMapping("weapon", "bullet_seeker_upgraded_diag_downright");
-    addAnimMapping("weapon", "bullet_seeker_upgraded_hor");
-    addAnimMapping("weapon", "bullet_seeker_upgraded_ver_up");
-    addAnimMapping("weapon", "bullet_seeker_upgraded_diag_upright");
-    addAnimMapping("weapon", "bullet_rf_hor");
-    addAnimMapping("weapon", "bullet_rf_diag_downright");
-    addAnimMapping("weapon", "bullet_rf_upgraded_diag_downright");
-    addAnimMapping("pickup", "ammo_rf_upgraded");
-    addAnimMapping("pickup", "ammo_rf");
-    addAnimMapping("weapon", "bullet_rf_upgraded_hor");
-    addAnimMapping("weapon", "bullet_rf_upgraded_ver");
-    addAnimMapping("weapon", "bullet_rf_upgraded_diag_upright");
-    addAnimMapping("weapon", "bullet_rf_ver");
-    addAnimMapping("weapon", "bullet_rf_diag_upright");
-    addAnimMapping("weapon", "bullet_toaster");
-    addAnimMapping("pickup", "ammo_toaster_upgraded");
-    addAnimMapping("pickup", "ammo_toaster");
-    addAnimMapping("weapon", "bullet_toaster_upgraded");
-    addAnimMapping("weapon", "bullet_tnt");
-    addAnimMapping("weapon", "bullet_fireball_hor");
-    addAnimMapping("pickup", "ammo_pepper_upgraded");
-    addAnimMapping("pickup", "ammo_pepper");
-    addAnimMapping("weapon", "bullet_fireball_upgraded_hor");
-    addAnimMapping("weapon", "bullet_fireball_ver");
-    addAnimMapping("weapon", "bullet_fireball_upgraded_ver");
-    addAnimMapping("weapon", "bullet_bladegun");
-    addAnimMapping("pickup", "ammo_electro_upgraded");
-    addAnimMapping("pickup", "ammo_electro");
-    addAnimMapping("weapon", "bullet_bladegun_upgraded");
-    addAnimMapping("common", "explosion_tiny");
-    addAnimMapping("common", "explosion_freezer_maybe");
-    addAnimMapping("common", "explosion_tiny_black");
-    addAnimMapping("weapon", "bullet_fireball_upgraded_hor_2");
-    addAnimMapping("unknown", "flare_hor_2");
-    addAnimMapping("unknown", "green_explosion");
-    addAnimMapping("weapon", "bullet_bladegun_alt");
-    addAnimMapping("weapon", "bullet_tnt_explosion");
-    addAnimMapping("object", "container_ammo_shrapnel_1");
-    addAnimMapping("object", "container_ammo_shrapnel_2");
-    addAnimMapping("common", "explosion_upwards");
-    addAnimMapping("common", "explosion_bomb");
-    addAnimMapping("common", "smoke_circling_white");
-    nextSet();
-    addAnimMapping("bat", "idle");
-    addAnimMapping("bat", "resting");
-    addAnimMapping("bat", "takeoff_1");
-    addAnimMapping("bat", "takeoff_2");
-    addAnimMapping("bat", "roost");
-    nextSet();
-    addAnimMapping("bee", "swarm");
-    nextSet();
-    addAnimMapping("bee", "swarm_2");
-    nextSet();
-    addAnimMapping("object", "pushbox_crate");
-    nextSet();
-    addAnimMapping("object", "pushbox_rock");
-    nextSet();
-    addAnimMapping("unknown", "diamondus_tileset_tree");
-    nextSet();
-    addAnimMapping("bilsy", "throw_fireball");
-    addAnimMapping("bilsy", "appear");
-    addAnimMapping("bilsy", "vanish");
-    addAnimMapping("bilsy", "bullet_fireball");
-    addAnimMapping("bilsy", "idle");
-    nextSet();
-    addAnimMapping("birdy", "charge_diag_downright");
-    addAnimMapping("birdy", "charge_ver");
-    addAnimMapping("birdy", "charge_diag_upright");
-    addAnimMapping("birdy", "caged");
-    addAnimMapping("birdy", "cage_destroyed");
-    addAnimMapping("birdy", "die");
-    addAnimMapping("birdy", "feather_green");
-    addAnimMapping("birdy", "feather_red");
-    addAnimMapping("birdy", "feather_green_and_red");
-    addAnimMapping("birdy", "fly");
-    addAnimMapping("birdy", "hurt");
-    addAnimMapping("birdy", "idle_worm");
-    addAnimMapping("birdy", "idle_turn_head_left");
-    addAnimMapping("birdy", "idle_look_left");
-    addAnimMapping("birdy", "idle_turn_head_left_back");
-    addAnimMapping("birdy", "idle_turn_head_right");
-    addAnimMapping("birdy", "idle_look_right");
-    addAnimMapping("birdy", "idle_turn_head_right_back");
-    addAnimMapping("birdy", "idle");
-    addAnimMapping("birdy", "corpse");
-    nextSet();
-    addAnimMapping("unimplemented", "bonus_birdy");
-    nextSet(); // set 10 (all)
-    addAnimMapping("platform", "ball");
-    addAnimMapping("platform", "ball_chain");
-    nextSet();
-    addAnimMapping("object", "bonus_active");
-    addAnimMapping("object", "bonus_inactive");
-    nextSet();
-    addAnimMapping("ui", "boss_health_bar");
-    nextSet();
-    addAnimMapping("bridge", "rope");
-    addAnimMapping("bridge", "stone");
-    addAnimMapping("bridge", "vine");
-    addAnimMapping("bridge", "stone_red");
-    addAnimMapping("bridge", "log");
-    addAnimMapping("bridge", "gem");
-    addAnimMapping("bridge", "lab");
-    nextSet();
-    addAnimMapping("bubba", "spew_fireball");
-    addAnimMapping("bubba", "corpse");
-    addAnimMapping("bubba", "jump");
-    addAnimMapping("bubba", "jump_fall");
-    addAnimMapping("bubba", "fireball");
-    addAnimMapping("bubba", "hop");
-    addAnimMapping("bubba", "tornado");
-    addAnimMapping("bubba", "tornado_start");
-    addAnimMapping("bubba", "tornado_end");
-    nextSet();
-    addAnimMapping("bee", "bee");
-    addAnimMapping("bee", "bee_turn");
-    nextSet();
-    addAnimMapping("unimplemented", "butterfly");
-    nextSet();
-    addAnimMapping("pole", "carrotus", CARROTUS_POLE_PALETTE);
-    nextSet();
-    addAnimMapping("cheshire", "platform_appear");
-    addAnimMapping("cheshire", "platform_vanish");
-    addAnimMapping("cheshire", "platform_idle");
-    addAnimMapping("cheshire", "platform_invisible");
-    nextSet();
-    addAnimMapping("cheshire", "hook_appear");
-    addAnimMapping("cheshire", "hook_vanish");
-    addAnimMapping("cheshire", "hook_idle");
-    addAnimMapping("cheshire", "hook_invisible");
-    nextSet(); // set 20 (all)
-    addAnimMapping("caterpillar", "exhale_start");
-    addAnimMapping("caterpillar", "exhale");
-    addAnimMapping("caterpillar", "disoriented");
-    addAnimMapping("caterpillar", "idle");
-    addAnimMapping("caterpillar", "inhale_start");
-    addAnimMapping("caterpillar", "inhale");
-    addAnimMapping("caterpillar", "smoke");
-    nextSet();
-    addAnimMapping("birdy_yellow", "charge_diag_downright_placeholder");
-    addAnimMapping("birdy_yellow", "charge_ver");
-    addAnimMapping("birdy_yellow", "charge_diag_upright");
-    addAnimMapping("birdy_yellow", "caged");
-    addAnimMapping("birdy_yellow", "cage_destroyed");
-    addAnimMapping("birdy_yellow", "die");
-    addAnimMapping("birdy_yellow", "feather_blue");
-    addAnimMapping("birdy_yellow", "feather_yellow");
-    addAnimMapping("birdy_yellow", "feather_blue_and_yellow");
-    addAnimMapping("birdy_yellow", "fly");
-    addAnimMapping("birdy_yellow", "hurt");
-    addAnimMapping("birdy_yellow", "idle_worm");
-    addAnimMapping("birdy_yellow", "idle_turn_head_left");
-    addAnimMapping("birdy_yellow", "idle_look_left");
-    addAnimMapping("birdy_yellow", "idle_turn_head_left_back");
-    addAnimMapping("birdy_yellow", "idle_turn_head_right");
-    addAnimMapping("birdy_yellow", "idle_look_right");
-    addAnimMapping("birdy_yellow", "idle_turn_head_right_back");
-    addAnimMapping("birdy_yellow", "idle");
-    addAnimMapping("birdy_yellow", "corpse");
-    nextSet();
-    addAnimMapping("common", "water_bubble_1");
-    addAnimMapping("common", "water_bubble_2");
-    addAnimMapping("common", "water_bubble_3");
-    addAnimMapping("common", "water_splash");
-    nextSet();
-    addAnimMapping("jazz", "gameover_continue");
-    addAnimMapping("jazz", "gameover_idle");
-    addAnimMapping("jazz", "gameover_end");
-    addAnimMapping("spaz", "gameover_continue");
-    addAnimMapping("spaz", "gameover_idle");
-    addAnimMapping("spaz", "gameover_end");
-    nextSet();
-    addAnimMapping("demon", "idle");
-    addAnimMapping("demon", "attack_start");
-    addAnimMapping("demon", "attack");
-    addAnimMapping("demon", "attack_end");
-    nextSet();
-    currentItem += 4;
-    addAnimMapping("common", "ice_block");
-    nextSet();
-    addAnimMapping("devan", "bullet_small");
-    addAnimMapping("devan", "remote_idle");
-    addAnimMapping("devan", "remote_fall_warp_out");
-    addAnimMapping("devan", "remote_fall");
-    addAnimMapping("devan", "remote_fall_rotate");
-    addAnimMapping("devan", "remote_fall_warp_in");
-    addAnimMapping("devan", "remote_warp_out");
-    nextSet();
-    addAnimMapping("devan", "demon_spew_fireball");
-    addAnimMapping("devan", "disoriented");
-    addAnimMapping("devan", "freefall");
-    addAnimMapping("devan", "disoriented_start");
-    addAnimMapping("devan", "demon_fireball");
-    addAnimMapping("devan", "demon_fly");
-    addAnimMapping("devan", "demon_transform_start");
-    addAnimMapping("devan", "demon_transform_end");
-    addAnimMapping("devan", "disarmed_idle");
-    addAnimMapping("devan", "demon_turn");
-    addAnimMapping("devan", "disarmed_warp_in");
-    addAnimMapping("devan", "disoriented_warp_out");
-    addAnimMapping("devan", "disarmed");
-    addAnimMapping("devan", "crouch");
-    addAnimMapping("devan", "shoot");
-    addAnimMapping("devan", "disarmed_gun");
-    addAnimMapping("devan", "jump");
-    addAnimMapping("devan", "bullet");
-    addAnimMapping("devan", "run");
-    addAnimMapping("devan", "run_end");
-    addAnimMapping("devan", "jump_end");
-    addAnimMapping("devan", "idle");
-    addAnimMapping("devan", "warp_in");
-    addAnimMapping("devan", "warp_out");
-    nextSet();
-    addAnimMapping("pole", "diamondus", DIAMONDUS_POLE_PALETTE);
-    nextSet();
-    addAnimMapping("doggy", "attack");
-    addAnimMapping("doggy", "walk");
-    nextSet(); // set 30 (all)
-    addAnimMapping("unimplemented", "door");
-    addAnimMapping("unimplemented", "door_enter_jazz_spaz");
-    nextSet();
-    addAnimMapping("dragonfly", "idle");
-    nextSet();
-    addAnimMapping("dragon", "attack");
-    addAnimMapping("dragon", "idle");
-    addAnimMapping("dragon", "turn");
-    nextSet(5, Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH);
-    nextSet(6, Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC);
-    addAnimMapping("eva", "blink");
-    addAnimMapping("eva", "idle");
-    addAnimMapping("eva", "kiss_start");
-    addAnimMapping("eva", "kiss_end");
-    nextSet();
-    addAnimMapping("ui", "icon_birdy");
-    addAnimMapping("ui", "icon_birdy_yellow");
-    addAnimMapping("ui", "icon_frog");
-    addAnimMapping("ui", "icon_jazz");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "ui", "icon_lori");
-    addAnimMapping("ui", "icon_spaz");
-    nextSet(2); // set 41 (1.24) / set 40 (1.23)
-    addAnimMapping("chick", "attack");
-    addAnimMapping("chick", "walk");
-    nextSet();
-    addAnimMapping("fencer", "attack");
-    addAnimMapping("fencer", "idle");
-    nextSet();
-    addAnimMapping("fish", "attack");
-    addAnimMapping("fish", "idle");
-    nextSet();
-    addAnimMapping("ctf", "arrow");
-    addAnimMapping("ctf", "base");
-    addAnimMapping("ctf", "lights");
-    addAnimMapping("ctf", "flag_blue");
-    addAnimMapping("ui", "ctf_flag_blue");
-    addAnimMapping("ctf", "base_eva");
-    addAnimMapping("ctf", "base_eva_cheer");
-    addAnimMapping("ctf", "flag_red");
-    addAnimMapping("ui", "ctf_flag_red");
-    nextSet(2);
-    addAnimMapping("ui", "font_medium");
-    addAnimMapping("ui", "font_small");
-    addAnimMapping("ui", "font_large");
-    addAnimMapping("ui", "logo");
-    addAnimMapping(Jazz2AnimVersion::CC, "ui", "cc_logo");
-    nextSet();
-    addAnimMapping("frog", "fall_land");
-    addAnimMapping("frog", "hurt");
-    addAnimMapping("frog", "idle");
-    addAnimMapping("jazz", "transform_frog");
-    addAnimMapping("frog", "fall");
-    addAnimMapping("frog", "jump_start");
-    addAnimMapping("frog", "crouch");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "transform_frog");
-    addAnimMapping("frog", "tongue_diag_upright");
-    addAnimMapping("frog", "tongue_hor");
-    addAnimMapping("frog", "tongue_ver");
-    addAnimMapping("spaz", "transform_frog");
-    addAnimMapping("frog", "run");
-    nextSet();
-    addAnimMapping("platform", "carrotus_fruit");
-    addAnimMapping("platform", "carrotus_fruit_chain");
-    nextSet();
-    addAnimMapping("pickup", "gem_gemring", GEM_PALETTE);
-    nextSet(); // set 50 (1.24) / set 49 (1.23)
-    addAnimMapping("unimplemented", "boxing_glove_stiff");
-    addAnimMapping("unimplemented", "boxing_glove_stiff_idle");
-    addAnimMapping("unimplemented", "boxing_glove_normal");
-    addAnimMapping("unimplemented", "boxing_glove_normal_idle");
-    addAnimMapping("unimplemented", "boxing_glove_relaxed");
-    addAnimMapping("unimplemented", "boxing_glove_relaxed_idle");
-    nextSet();
-    addAnimMapping("platform", "carrotus_grass");
-    addAnimMapping("platform", "carrotus_grass_chain");
-    nextSet();
-    addAnimMapping("mad_hatter", "cup");
-    addAnimMapping("mad_hatter", "hat");
-    addAnimMapping("mad_hatter", "attack");
-    addAnimMapping("mad_hatter", "bullet_spit");
-    addAnimMapping("mad_hatter", "walk");
-    nextSet();
-    addAnimMapping("helmut", "idle");
-    addAnimMapping("helmut", "walk");
-    nextSet(2);
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_unknown_disoriented");
-    addAnimMapping("jazz", "airboard");
-    addAnimMapping("jazz", "airboard_turn");
-    addAnimMapping("jazz", "buttstomp_end");
-    addAnimMapping("jazz", "corpse");
-    addAnimMapping("jazz", "die");
-    addAnimMapping("jazz", "crouch_start");
-    addAnimMapping("jazz", "crouch");
-    addAnimMapping("jazz", "crouch_shoot");
-    addAnimMapping("jazz", "crouch_end");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_door_enter");
-    addAnimMapping("jazz", "vine_walk");
-    addAnimMapping("jazz", "eol");
-    addAnimMapping("jazz", "fall");
-    addAnimMapping("jazz", "buttstomp");
-    addAnimMapping("jazz", "fall_end");
-    addAnimMapping("jazz", "shoot");
-    addAnimMapping("jazz", "shoot_ver");
-    addAnimMapping("jazz", "shoot_end");
-    addAnimMapping("jazz", "transform_frog_end");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_ledge_climb");
-    addAnimMapping("jazz", "vine_shoot_start");
-    addAnimMapping("jazz", "vine_shoot_up_end");
-    addAnimMapping("jazz", "vine_shoot_up");
-    addAnimMapping("jazz", "vine_idle");
-    addAnimMapping("jazz", "vine_idle_flavor");
-    addAnimMapping("jazz", "vine_shoot_end");
-    addAnimMapping("jazz", "vine_shoot");
-    addAnimMapping("jazz", "copter");
-    addAnimMapping("jazz", "copter_shoot_start");
-    addAnimMapping("jazz", "copter_shoot");
-    addAnimMapping("jazz", "pole_h");
-    addAnimMapping("jazz", "hurt");
-    addAnimMapping("jazz", "idle_flavor_1");
-    addAnimMapping("jazz", "idle_flavor_2");
-    addAnimMapping("jazz", "idle_flavor_3");
-    addAnimMapping("jazz", "idle_flavor_4");
-    addAnimMapping("jazz", "idle_flavor_5");
-    addAnimMapping("jazz", "vine_shoot_up_start");
-    addAnimMapping("jazz", "fall_shoot");
-    addAnimMapping("jazz", "jump_unknown_1");
-    addAnimMapping("jazz", "jump_unknown_2");
-    addAnimMapping("jazz", "jump");
-    addAnimMapping("jazz", "ledge");
-    addAnimMapping("jazz", "lift");
-    addAnimMapping("jazz", "lift_jump_light");
-    addAnimMapping("jazz", "lift_jump_heavy");
-    addAnimMapping("jazz", "lookup_start");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_run_diag_upright");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_run_ver_up");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_run_diag_upleft_reverse");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_run_reverse");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_run_diag_downleft_reverse");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_run_ver_down");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_run_diag_downright");
-    addAnimMapping("jazz", "dizzy_walk");
-    addAnimMapping("jazz", "push");
-    addAnimMapping("jazz", "shoot_start");
-    addAnimMapping("jazz", "revup_start");
-    addAnimMapping("jazz", "revup");
-    addAnimMapping("jazz", "revup_end");
-    addAnimMapping("jazz", "fall_diag");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_unknown_mid_frame");
-    addAnimMapping("jazz", "jump_diag");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_jump_shoot_end");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_jump_shoot_ver_start");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_jump_shoot_ver");
-    addAnimMapping("jazz", "ball");
-    addAnimMapping("jazz", "run");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_run_aim_diag");
-    addAnimMapping("jazz", "dash_start");
-    addAnimMapping("jazz", "dash");
-    addAnimMapping("jazz", "dash_stop");
-    addAnimMapping("jazz", "walk_stop");
-    addAnimMapping("jazz", "run_stop");
-    addAnimMapping("jazz", "spring");
-    addAnimMapping("jazz", "idle");
-    addAnimMapping("jazz", "uppercut");
-    addAnimMapping("jazz", "uppercut_end");
-    addAnimMapping("jazz", "uppercut_start");
-    addAnimMapping("jazz", "dizzy");
-    addAnimMapping("jazz", "swim_diag_downright");
-    addAnimMapping("jazz", "swim_right");
-    addAnimMapping("jazz", "swim_diag_right_to_downright");
-    addAnimMapping("jazz", "swim_diag_right_to_upright");
-    addAnimMapping("jazz", "swim_diag_upright");
-    addAnimMapping("jazz", "swing");
-    addAnimMapping("jazz", "warp_in");
-    addAnimMapping("jazz", "warp_out_freefall");
-    addAnimMapping("jazz", "freefall");
-    addAnimMapping("jazz", "warp_in_freefall");
-    addAnimMapping("jazz", "warp_out");
-    addAnimMapping("jazz", "pole_v");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_unarmed_crouch_start");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_unarmed_crouch_end");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_unarmed_fall");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_unarmed_hurt");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_unarmed_idle");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_unarmed_jump");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_unarmed_crouch_end_2");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_lookup_start");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_unarmed_run");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_unarmed_stare");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "jazz", "unused_lookup_start_2");
-    nextSet();
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "unimplemented", "bonus_jazz_idle_flavor_2");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "unimplemented", "bonus_jazz_jump_2");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "unimplemented", "bonus_jazz_dash_2");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "unimplemented", "bonus_jazz_rotate_2");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "unimplemented", "bonus_jazz_ball_2");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "unimplemented", "bonus_jazz_run_2");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "unimplemented", "bonus_jazz_idle_2");
-    addAnimMapping("unimplemented", "bonus_jazz_idle_flavor");
-    addAnimMapping("unimplemented", "bonus_jazz_jump");
-    addAnimMapping("unimplemented", "bonus_jazz_ball");
-    addAnimMapping("unimplemented", "bonus_jazz_run");
-    addAnimMapping("unimplemented", "bonus_jazz_dash");
-    addAnimMapping("unimplemented", "bonus_jazz_rotate");
-    addAnimMapping("unimplemented", "bonus_jazz_idle");
-    nextSet(2);
-    addAnimMapping("pole", "jungle", JUNGLE_POLE_PALETTE);
-    nextSet();
-    addAnimMapping("lab_rat", "attack");
-    addAnimMapping("lab_rat", "idle");
-    addAnimMapping("lab_rat", "walk");
-    nextSet(); // set 60 (1.24) / set 59 (1.23)
-    addAnimMapping("lizard", "copter_attack");
-    addAnimMapping("lizard", "bomb");
-    addAnimMapping("lizard", "copter_idle");
-    addAnimMapping("lizard", "copter");
-    addAnimMapping("lizard", "walk");
-    nextSet(1, Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC);
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "airboard");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "airboard_turn");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "buttstomp_end");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "corpse");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "die");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "crouch_start");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "crouch");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "crouch_shoot");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "crouch_end");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "vine_walk");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "eol");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "fall");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "buttstomp");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "fall_end");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "shoot");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "shoot_ver");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "shoot_end");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "transform_frog_end");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "vine_shoot_start");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "vine_shoot_up_end");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "vine_shoot_up");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "vine_idle");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "vine_idle_flavor");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "vine_shoot_end");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "vine_shoot");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "copter");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "copter_shoot_start");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "copter_shoot");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "pole_h");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "hurt");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "idle_flavor_1");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "idle_flavor_2");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "idle_flavor_3");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "idle_flavor_4");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "idle_flavor_5");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "vine_shoot_up_start");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "fall_shoot");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "jump_unknown_1");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "jump_unknown_2");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "jump");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "ledge");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "lift");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "lift_jump_light");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "lift_jump_heavy");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "lookup_start");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "dizzy_walk");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "push");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "shoot_start");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "revup_start");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "revup");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "revup_end");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "fall_diag");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "jump_diag");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "ball");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "run");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "dash_start");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "dash");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "dash_stop");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "walk_stop");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "run_stop");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "spring");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "idle");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "uppercut_placeholder_1");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "uppercut_placeholder_2");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "sidekick");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "dizzy");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "swim_diag_downright");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "swim_right");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "swim_diag_right_to_downright");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "swim_diag_right_to_upright");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "swim_diag_upright");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "swing");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "warp_in");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "warp_out_freefall");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "freefall");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "warp_in_freefall");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "warp_out");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "pole_v");
-    nextSet(1, Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC);
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "idle_2");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "gun");
-    nextSet(1, Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC);
-    nextSet();
-    addAnimMapping("ui", "multiplayer_char", MENU_PALETTE);
-    addAnimMapping("ui", "multiplayer_color", MENU_PALETTE);
-    addAnimMapping("ui", "character_art_difficulty_jazz", MENU_PALETTE);
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "ui", "character_art_difficulty_lori", MENU_PALETTE);
-    addAnimMapping("ui", "character_art_difficulty_spaz", MENU_PALETTE);
-    addAnimMapping("unimplemented", "key", MENU_PALETTE);
-    addAnimMapping("ui", "loading_bar", MENU_PALETTE);
-    addAnimMapping("ui", "multiplayer_mode", MENU_PALETTE);
-    addAnimMapping("ui", "character_name_jazz", MENU_PALETTE);
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "ui", "character_name_lori", MENU_PALETTE);
-    addAnimMapping("ui", "character_name_spaz", MENU_PALETTE);
-    addAnimMapping("ui", "character_art_jazz", MENU_PALETTE);
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "ui", "character_art_lori", MENU_PALETTE);
-    addAnimMapping("ui", "character_art_spaz", MENU_PALETTE);
-    nextSet();
-    addAnimMapping("ui", "font_medium_2", MENU_PALETTE);
-    addAnimMapping("ui", "font_small_2", MENU_PALETTE);
-    addAnimMapping("ui", "logo_large", MENU_PALETTE);
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "ui", "tsf_title", MENU_PALETTE);
-    addAnimMapping(Jazz2AnimVersion::CC, "ui", "menu_snow", MENU_PALETTE);
-    addAnimMapping("ui", "logo_small", MENU_PALETTE);
-    addAnimMapping(Jazz2AnimVersion::CC, "ui", "cc_title", MENU_PALETTE);
-    addAnimMapping(Jazz2AnimVersion::CC, "ui", "cc_title_small", MENU_PALETTE);
-    nextSet(2);
-    addAnimMapping("monkey", "banana");
-    addAnimMapping("monkey", "banana_splat");
-    addAnimMapping("monkey", "jump");
-    addAnimMapping("monkey", "walk_start");
-    addAnimMapping("monkey", "walk_end");
-    addAnimMapping("monkey", "attack");
-    addAnimMapping("monkey", "walk");
-    nextSet();
-    addAnimMapping("moth", "green");
-    addAnimMapping("moth", "gray");
-    addAnimMapping("moth", "purple");
-    addAnimMapping("moth", "pink");
-    nextSet(3); // set 71 (1.24) / set 67 (1.23)
-    addAnimMapping("pickup", "1up");
-    addAnimMapping("pickup", "food_apple");
-    addAnimMapping("pickup", "food_banana");
-    addAnimMapping("object", "container_barrel");
-    addAnimMapping("common", "poof_brown");
-    addAnimMapping("object", "container_box_crush");
-    addAnimMapping("object", "container_barrel_shrapnel_1");
-    addAnimMapping("object", "container_barrel_shrapnel_2");
-    addAnimMapping("object", "container_barrel_shrapnel_3");
-    addAnimMapping("object", "container_barrel_shrapnel_4");
-    addAnimMapping("object", "powerup_shield_bubble");
-    addAnimMapping("pickup", "food_burger");
-    addAnimMapping("pickup", "food_cake");
-    addAnimMapping("pickup", "food_candy");
-    addAnimMapping("object", "savepoint");
-    addAnimMapping("pickup", "food_cheese");
-    addAnimMapping("pickup", "food_cherry");
-    addAnimMapping("pickup", "food_chicken");
-    addAnimMapping("pickup", "food_chips");
-    addAnimMapping("pickup", "food_chocolate");
-    addAnimMapping("pickup", "food_cola");
-    addAnimMapping("pickup", "carrot");
-    addAnimMapping("pickup", "gem", GEM_PALETTE);
-    addAnimMapping("pickup", "food_cucumber");
-    addAnimMapping("pickup", "food_cupcake");
-    addAnimMapping("pickup", "food_donut");
-    addAnimMapping("pickup", "food_eggplant");
-    addAnimMapping("unknown", "green_blast_thing");
-    addAnimMapping("object", "exit_sign");
-    addAnimMapping("pickup", "fast_fire_jazz");
-    addAnimMapping("pickup", "fast_fire_spaz");
-    addAnimMapping("object", "powerup_shield_fire");
-    addAnimMapping("pickup", "food_fries");
-    addAnimMapping("pickup", "fast_feet");
-    addAnimMapping("object", "gem_super", GEM_PALETTE);
-    addAnimMapping("pickup", "gem_2", GEM_PALETTE);
-    addAnimMapping("pickup", "airboard");
-    addAnimMapping("pickup", "coin_gold");
-    addAnimMapping("pickup", "food_grapes");
-    addAnimMapping("pickup", "food_ham");
-    addAnimMapping("pickup", "carrot_fly");
-    addAnimMapping("ui", "heart");
-    addAnimMapping("pickup", "freeze_enemies");
-    addAnimMapping("pickup", "food_ice_cream");
-    addAnimMapping("common", "ice_break_shrapnel_1");
-    addAnimMapping("common", "ice_break_shrapnel_2");
-    addAnimMapping("common", "ice_break_shrapnel_3");
-    addAnimMapping("common", "ice_break_shrapnel_4");
-    addAnimMapping("pickup", "food_lemon");
-    addAnimMapping("pickup", "food_lettuce");
-    addAnimMapping("pickup", "food_lime");
-    addAnimMapping("object", "powerup_shield_lightning");
-    addAnimMapping("object", "trigger_crate");
-    addAnimMapping("pickup", "food_milk");
-    addAnimMapping("object", "crate_ammo_bouncer");
-    addAnimMapping("object", "crate_ammo_freezer");
-    addAnimMapping("object", "crate_ammo_seeker");
-    addAnimMapping("object", "crate_ammo_rf");
-    addAnimMapping("object", "crate_ammo_toaster");
-    addAnimMapping("object", "crate_ammo_tnt");
-    addAnimMapping("object", "powerup_upgrade_blaster_jazz");
-    addAnimMapping("object", "powerup_upgrade_bouncer");
-    addAnimMapping("object", "powerup_upgrade_freezer");
-    addAnimMapping("object", "powerup_upgrade_seeker");
-    addAnimMapping("object", "powerup_upgrade_rf");
-    addAnimMapping("object", "powerup_upgrade_toaster");
-    addAnimMapping("object", "powerup_upgrade_pepper");
-    addAnimMapping("object", "powerup_upgrade_electro");
-    addAnimMapping("object", "powerup_transform_birdy");
-    addAnimMapping("object", "powerup_transform_birdy_yellow");
-    addAnimMapping("object", "powerup_swap_characters");
-    addAnimMapping("pickup", "food_orange");
-    addAnimMapping("pickup", "carrot_invincibility");
-    addAnimMapping("pickup", "food_peach");
-    addAnimMapping("pickup", "food_pear");
-    addAnimMapping("pickup", "food_soda");
-    addAnimMapping("pickup", "food_pie");
-    addAnimMapping("pickup", "food_pizza");
-    addAnimMapping("pickup", "potion");
-    addAnimMapping("pickup", "food_pretzel");
-    addAnimMapping("pickup", "food_sandwich");
-    addAnimMapping("pickup", "food_strawberry");
-    addAnimMapping("pickup", "carrot_full");
-    addAnimMapping("object", "powerup_upgrade_blaster_spaz");
-    addAnimMapping("pickup", "coin_silver");
-    addAnimMapping("unknown", "green_blast_thing_2");
-    addAnimMapping("common", "generator");
-    addAnimMapping("pickup", "stopwatch");
-    addAnimMapping("pickup", "food_taco");
-    addAnimMapping("pickup", "food_thing");
-    addAnimMapping("object", "tnt");
-    addAnimMapping("pickup", "food_hotdog");
-    addAnimMapping("pickup", "food_watermelon");
-    addAnimMapping("object", "container_crate_shrapnel_1");
-    addAnimMapping("object", "container_crate_shrapnel_2");
-    nextSet();
-    addAnimMapping("pinball", "bumper_500", PINBALL_PALETTE);
-    addAnimMapping("pinball", "bumper_500_hit", PINBALL_PALETTE);
-    addAnimMapping("pinball", "bumper_carrot", PINBALL_PALETTE);
-    addAnimMapping("pinball", "bumper_carrot_hit", PINBALL_PALETTE);
-    addAnimMapping("pinball", "paddle_left");
-    addAnimMapping("pinball", "paddle_right");
-    nextSet();
-    addAnimMapping("platform", "lab");
-    addAnimMapping("platform", "lab_chain");
-    nextSet();
-    addAnimMapping("pole", "psych", PSYCH_POLE_PALETTE);
-    nextSet();
-    addAnimMapping("queen", "scream");
-    addAnimMapping("queen", "ledge");
-    addAnimMapping("queen", "ledge_recover");
-    addAnimMapping("queen", "idle");
-    addAnimMapping("queen", "brick");
-    addAnimMapping("queen", "fall");
-    addAnimMapping("queen", "stomp");
-    addAnimMapping("queen", "backstep");
-    nextSet();
-    addAnimMapping("rapier", "attack");
-    addAnimMapping("rapier", "attack_swing");
-    addAnimMapping("rapier", "idle");
-    addAnimMapping("rapier", "attack_start");
-    addAnimMapping("rapier", "attack_end");
-    nextSet();
-    addAnimMapping("raven", "attack");
-    addAnimMapping("raven", "idle");
-    addAnimMapping("raven", "turn");
-    nextSet();
-    addAnimMapping("robot", "spike_ball");
-    addAnimMapping("robot", "attack_start");
-    addAnimMapping("robot", "attack");
-    addAnimMapping("robot", "copter");
-    addAnimMapping("robot", "idle");
-    addAnimMapping("robot", "attack_end");
-    addAnimMapping("robot", "shrapnel_1");
-    addAnimMapping("robot", "shrapnel_2");
-    addAnimMapping("robot", "shrapnel_3");
-    addAnimMapping("robot", "shrapnel_4");
-    addAnimMapping("robot", "shrapnel_5");
-    addAnimMapping("robot", "shrapnel_6");
-    addAnimMapping("robot", "shrapnel_7");
-    addAnimMapping("robot", "shrapnel_8");
-    addAnimMapping("robot", "shrapnel_9");
-    addAnimMapping("robot", "run");
-    addAnimMapping("robot", "copter_start");
-    addAnimMapping("robot", "copter_end");
-    nextSet();
-    addAnimMapping("object", "rolling_rock");
-    nextSet(); // set 80 (1.24) / set 76 (1.23)
-    addAnimMapping("rocket_turtle", "downright");
-    addAnimMapping("rocket_turtle", "upright");
-    addAnimMapping("rocket_turtle", "smoke");
-    addAnimMapping("rocket_turtle", "upright_to_downright");
-    nextSet(3);
-    addAnimMapping("skeleton", "bone");
-    addAnimMapping("skeleton", "skull");
-    addAnimMapping("skeleton", "walk");
-    nextSet();
-    addAnimMapping("pole", "diamondus_tree", DIAMONDUS_POLE_PALETTE);
-    nextSet();
-    addAnimMapping("common", "snow", SNOW_PALETTE);
-    nextSet();
-    addAnimMapping("spike", "rocket");
-    addAnimMapping("spike", "mace_chain");
-    addAnimMapping("spike", "bottom");
-    addAnimMapping("spike", "top");
-    addAnimMapping("spike", "puff");
-    addAnimMapping("spike", "mace");
-    addAnimMapping("spike", "turret");
-    addAnimMapping("spike", "crosshairs");
-    nextSet();
-    addAnimMapping("platform", "sonic");
-    addAnimMapping("platform", "sonic_chain");
-    nextSet();
-    addAnimMapping("sparks", "idle");
-    nextSet();
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_unknown_disoriented");
-    addAnimMapping("spaz", "airboard");
-    addAnimMapping("spaz", "airboard_turn");
-    addAnimMapping("spaz", "buttstomp_end");
-    addAnimMapping("spaz", "corpse");
-    addAnimMapping("spaz", "die");
-    addAnimMapping("spaz", "crouch_start");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "crouch_shoot_2");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "spaz", "crouch");
-    addAnimMapping("spaz", "crouch_shoot");
-    addAnimMapping("spaz", "crouch_end");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_door_enter");
-    addAnimMapping("spaz", "vine_walk");
-    addAnimMapping("spaz", "eol");
-    addAnimMapping("spaz", "fall");
-    addAnimMapping("spaz", "buttstomp");
-    addAnimMapping("spaz", "fall_end");
-    addAnimMapping("spaz", "shoot");
-    addAnimMapping("spaz", "shoot_ver");
-    addAnimMapping("spaz", "shoot_end");
-    addAnimMapping("spaz", "transform_frog_end");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_ledge_climb");
-    addAnimMapping("spaz", "vine_shoot_start");
-    addAnimMapping("spaz", "vine_shoot_up_end");
-    addAnimMapping("spaz", "vine_shoot_up");
-    addAnimMapping("spaz", "vine_idle");
-    addAnimMapping("spaz", "vine_idle_flavor");
-    addAnimMapping("spaz", "vine_shoot_end");
-    addAnimMapping("spaz", "vine_shoot");
-    addAnimMapping("spaz", "copter");
-    addAnimMapping("spaz", "copter_shoot_start");
-    addAnimMapping("spaz", "copter_shoot");
-    addAnimMapping("spaz", "pole_h");
-    addAnimMapping("spaz", "hurt");
-    addAnimMapping("spaz", "idle_flavor_1");
-    addAnimMapping("spaz", "idle_flavor_2");
-    addAnimMapping("spaz", "idle_flavor_3_placeholder");
-    addAnimMapping("spaz", "idle_flavor_4");
-    addAnimMapping("spaz", "idle_flavor_5");
-    addAnimMapping("spaz", "vine_shoot_up_start");
-    addAnimMapping("spaz", "fall_shoot");
-    addAnimMapping("spaz", "jump_unknown_1");
-    addAnimMapping("spaz", "jump_unknown_2");
-    addAnimMapping("spaz", "jump");
-    addAnimMapping("spaz", "ledge");
-    addAnimMapping("spaz", "lift");
-    addAnimMapping("spaz", "lift_jump_light");
-    addAnimMapping("spaz", "lift_jump_heavy");
-    addAnimMapping("spaz", "lookup_start");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_run_diag_upright");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_run_ver_up");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_run_diag_upleft_reverse");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_run_reverse");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_run_diag_downleft_reverse");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_run_ver_down");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_run_diag_downright");
-    addAnimMapping("spaz", "dizzy_walk");
-    addAnimMapping("spaz", "push");
-    addAnimMapping("spaz", "shoot_start");
-    addAnimMapping("spaz", "revup_start");
-    addAnimMapping("spaz", "revup");
-    addAnimMapping("spaz", "revup_end");
-    addAnimMapping("spaz", "fall_diag");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_unknown_mid_frame");
-    addAnimMapping("spaz", "jump_diag");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_jump_shoot_end");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_jump_shoot_ver_start");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_jump_shoot_ver");
-    addAnimMapping("spaz", "ball");
-    addAnimMapping("spaz", "run");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_run_aim_diag");
-    addAnimMapping("spaz", "dash_start");
-    addAnimMapping("spaz", "dash");
-    addAnimMapping("spaz", "dash_stop");
-    addAnimMapping("spaz", "walk_stop");
-    addAnimMapping("spaz", "run_stop");
-    addAnimMapping("spaz", "spring");
-    addAnimMapping("spaz", "idle");
-    addAnimMapping("spaz", "sidekick");
-    addAnimMapping("spaz", "sidekick_end");
-    addAnimMapping("spaz", "sidekick_start");
-    addAnimMapping("spaz", "dizzy");
-    addAnimMapping("spaz", "swim_diag_downright");
-    addAnimMapping("spaz", "swim_right");
-    addAnimMapping("spaz", "swim_diag_right_to_downright");
-    addAnimMapping("spaz", "swim_diag_right_to_upright");
-    addAnimMapping("spaz", "swim_diag_upright");
-    addAnimMapping("spaz", "swing");
-    addAnimMapping("spaz", "warp_in");
-    addAnimMapping("spaz", "warp_out_freefall");
-    addAnimMapping("spaz", "freefall");
-    addAnimMapping("spaz", "warp_in_freefall");
-    addAnimMapping("spaz", "warp_out");
-    addAnimMapping("spaz", "pole_v");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_unarmed_crouch_start");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_unarmed_crouch_end");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_unarmed_fall");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_unarmed_hurt");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_unarmed_idle");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_unarmed_jump");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_unarmed_crouch_end_2");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_lookup_start");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_unarmed_run");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_unarmed_stare");
-    addAnimMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "spaz", "unused_lookup_start_2");
-    nextSet(); // set 90 (1.24) / set 86 (1.23)
-    addAnimMapping("spaz", "idle_flavor_3_start");
-    addAnimMapping("spaz", "idle_flavor_3");
-    addAnimMapping("spaz", "idle_flavor_3_bird");
-    addAnimMapping("spaz", "idle_flavor_5_spaceship");
-    nextSet();
-    addAnimMapping("unimplemented", "bonus_spaz_idle_flavor");
-    addAnimMapping("unimplemented", "bonus_spaz_jump");
-    addAnimMapping("unimplemented", "bonus_spaz_ball");
-    addAnimMapping("unimplemented", "bonus_spaz_run");
-    addAnimMapping("unimplemented", "bonus_spaz_dash");
-    addAnimMapping("unimplemented", "bonus_spaz_rotate");
-    addAnimMapping("unimplemented", "bonus_spaz_idle");
-    nextSet(2);
-    addAnimMapping("object", "3d_spike");
-    addAnimMapping("object", "3d_spike_chain");
-    nextSet();
-    addAnimMapping("object", "3d_spike_2");
-    addAnimMapping("object", "3d_spike_2_chain");
-    nextSet();
-    addAnimMapping("platform", "spike");
-    addAnimMapping("platform", "spike_chain");
-    nextSet();
-    addAnimMapping("object", "spring_blue_ver");
-    addAnimMapping("object", "spring_blue_hor");
-    addAnimMapping("object", "spring_blue_ver_reverse");
-    addAnimMapping("object", "spring_green_ver_reverse");
-    addAnimMapping("object", "spring_red_ver_reverse");
-    addAnimMapping("object", "spring_green_ver");
-    addAnimMapping("object", "spring_green_hor");
-    addAnimMapping("object", "spring_red_ver");
-    addAnimMapping("object", "spring_red_hor");
-    nextSet();
-    addAnimMapping("common", "steam_note");
-    nextSet(2);
-    addAnimMapping("sucker_tube", "walk_top");
-    addAnimMapping("sucker_tube", "inflated_deflate");
-    addAnimMapping("sucker_tube", "walk_ver_down");
-    addAnimMapping("sucker_tube", "fall");
-    addAnimMapping("sucker_tube", "inflated");
-    addAnimMapping("sucker_tube", "poof");
-    addAnimMapping("sucker_tube", "walk");
-    addAnimMapping("sucker_tube", "walk_ver_up");
-    nextSet(); // set 100 (1.24) / set 96 (1.23)
-    addAnimMapping("tube_turtle", "idle");
-    nextSet();
-    addAnimMapping("tough_turtle_boss", "attack_start");
-    addAnimMapping("tough_turtle_boss", "attack_end");
-    addAnimMapping("tough_turtle_boss", "shell");
-    addAnimMapping("tough_turtle_boss", "mace");
-    addAnimMapping("tough_turtle_boss", "idle");
-    addAnimMapping("tough_turtle_boss", "walk");
-    nextSet();
-    addAnimMapping("tough_turtle", "walk");
-    nextSet();
-    addAnimMapping("turtle", "attack");
-    addAnimMapping("turtle", "idle_flavor");
-    addAnimMapping("turtle", "turn_start");
-    addAnimMapping("turtle", "turn_end");
-    addAnimMapping("turtle", "shell_reverse");
-    addAnimMapping("turtle", "shell");
-    addAnimMapping("turtle", "idle");
-    addAnimMapping("turtle", "walk");
-    nextSet();
-    addAnimMapping("tweedle", "magnet_start");
-    addAnimMapping("tweedle", "spin");
-    addAnimMapping("tweedle", "magnet_end");
-    addAnimMapping("tweedle", "shoot_jazz");
-    addAnimMapping("tweedle", "shoot_spaz");
-    addAnimMapping("tweedle", "hurt");
-    addAnimMapping("tweedle", "idle");
-    addAnimMapping("tweedle", "magnet");
-    addAnimMapping("tweedle", "walk");
-    nextSet();
-    addAnimMapping("uterus", "closed_start");
-    addAnimMapping("uterus", "crab_spawn");
-    addAnimMapping("uterus", "closed_idle");
-    addAnimMapping("uterus", "idle");
-    addAnimMapping("crab", "fall_end");
-    addAnimMapping("uterus", "closed_end");
-    addAnimMapping("uterus", "shield");
-    addAnimMapping("crab", "walk");
-    nextSet();
-    currentItem += 1;
-    addAnimMapping("object", "vine");
-    nextSet();
-    addAnimMapping("object", "bonus_10");
-    nextSet();
-    addAnimMapping("object", "bonus_100");
-    nextSet();
-    addAnimMapping("object", "bonus_20");
-    nextSet(); // set 110 (1.24) / set 106 (1.23)
-    addAnimMapping("object", "bonus_50");
-    nextSet(2);
-    addAnimMapping("witch", "attack");
-    addAnimMapping("witch", "die");
-    addAnimMapping("witch", "idle");
-    addAnimMapping("witch", "bullet_magic");
-    nextSet(1, Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH);
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "bilsy", "xmas_throw_fireball");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "bilsy", "xmas_appear");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "bilsy", "xmas_vanish");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "bilsy", "xmas_bullet_fireball");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "bilsy", "xmas_idle");
-    nextSet(1, Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH);
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "lizard", "xmas_copter_attack");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "lizard", "xmas_bomb");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "lizard", "xmas_copter_idle");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "lizard", "xmas_copter");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "lizard", "xmas_walk");
-    nextSet(1, Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH);
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "turtle", "xmas_attack");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "turtle", "xmas_idle_flavor");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "turtle", "xmas_turn_start");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "turtle", "xmas_turn_end");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "turtle", "xmas_shell_reverse");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "turtle", "xmas_shell");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "turtle", "xmas_idle");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "turtle", "xmas_walk");
-    nextSet(1, Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC);
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "doggy", "xmas_attack");
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "doggy", "xmas_walk");
-    nextSet(1, Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC);
-    addAnimMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "sparks", "ghost_idle");
+        section = &(*(map.get()))[60];
+        section->insert(10, { "ui", "character_art_lori", MENU_PALETTE });
+        section->insert(8, { "ui", "character_name_lori", MENU_PALETTE });
+        section->insert(3, { "ui", "character_art_difficulty_lori", MENU_PALETTE });
 
-    moved.swap(wipAnimMap);
-    return moved;
+        map->insert(60, {
+            { "lori", "airboard" },
+            { "lori", "airboard_turn" },
+            { "lori", "buttstomp_end" },
+            { "lori", "corpse" },
+            { "lori", "die" },
+            { "lori", "crouch_start" },
+            { "lori", "crouch" },
+            { "lori", "crouch_shoot" },
+            { "lori", "crouch_end" },
+            { "lori", "vine_walk" },
+            { "lori", "eol" },
+            { "lori", "fall" },
+            { "lori", "buttstomp" },
+            { "lori", "fall_end" },
+            { "lori", "shoot" },
+            { "lori", "shoot_ver" },
+            { "lori", "shoot_end" },
+            { "lori", "transform_frog_end" },
+            { "lori", "vine_shoot_start" },
+            { "lori", "vine_shoot_up_end" },
+            { "lori", "vine_shoot_up" },
+            { "lori", "vine_idle" },
+            { "lori", "vine_idle_flavor" },
+            { "lori", "vine_shoot_end" },
+            { "lori", "vine_shoot" },
+            { "lori", "copter" },
+            { "lori", "copter_shoot_start" },
+            { "lori", "copter_shoot" },
+            { "lori", "pole_h" },
+            { "lori", "hurt" },
+            { "lori", "idle_flavor_1" },
+            { "lori", "idle_flavor_2" },
+            { "lori", "idle_flavor_3" },
+            { "lori", "idle_flavor_4" },
+            { "lori", "idle_flavor_5" },
+            { "lori", "vine_shoot_up_start" },
+            { "lori", "fall_shoot" },
+            { "lori", "jump_unknown_1" },
+            { "lori", "jump_unknown_2" },
+            { "lori", "jump" },
+            { "lori", "ledge" },
+            { "lori", "lift" },
+            { "lori", "lift_jump_light" },
+            { "lori", "lift_jump_heavy" },
+            { "lori", "lookup_start" },
+            { "lori", "dizzy_walk" },
+            { "lori", "push" },
+            { "lori", "shoot_start" },
+            { "lori", "revup_start" },
+            { "lori", "revup" },
+            { "lori", "revup_end" },
+            { "lori", "fall_diag" },
+            { "lori", "jump_diag" },
+            { "lori", "ball" },
+            { "lori", "run" },
+            { "lori", "dash_start" },
+            { "lori", "dash" },
+            { "lori", "dash_stop" },
+            { "lori", "walk_stop" },
+            { "lori", "run_stop" },
+            { "lori", "spring" },
+            { "lori", "idle" },
+            { "lori", "uppercut_placeholder_1" },
+            { "lori", "uppercut_placeholder_2" },
+            { "lori", "sidekick" },
+            { "lori", "dizzy" },
+            { "lori", "swim_diag_downright" },
+            { "lori", "swim_right" },
+            { "lori", "swim_diag_right_to_downright" },
+            { "lori", "swim_diag_right_to_upright" },
+            { "lori", "swim_diag_upright" },
+            { "lori", "swing" },
+            { "lori", "warp_in" },
+            { "lori", "warp_out_freefall" },
+            { "lori", "freefall" },
+            { "lori", "warp_in_freefall" },
+            { "lori", "warp_out" },
+            { "lori", "pole_v" }
+        });
+        map->insert(61, {
+            { "lori", "idle_2" },
+            { "lori", "gun" }
+        });
+        map->insert(62, {});
+
+        section = &(*(map.get()))[55];
+        section->remove(0, 7);
+
+        section = &(*(map.get()))[54];
+        section->remove(93, 11);
+        section->remove(69);
+        section->remove(64, 3);
+        section->remove(62);
+        section->remove(48, 7);
+        section->remove(20);
+        section->remove(10);
+        section->remove(0);
+
+        section = &(*(map.get()))[46];
+        section->insert(7, { "lori", "transform_frog" });
+    }
+    if (version == Jazz2AnimVersion::CC) {
+        auto uiItems = &(*(map.get()))[45];
+        uiItems->append({ "ui", "cc_logo" });
+    }
+    if (version == Jazz2AnimVersion::TSF || version == Jazz2AnimVersion::CC) {
+        auto section = &(*(map.get()))[38];
+        section->insert(4, { "ui", "icon_lori" });
+
+        map->insert(35, {});
+    }
+    
+    return map;
 }
 
-std::shared_ptr<SampleIDMap> IDMapper::getSampleMapping() {
-    wipSampleMap = std::make_shared<SampleIDMap>();
-    std::shared_ptr<SampleIDMap> moved;
-    currentItem = 0;
-    currentSet = 0;
+std::shared_ptr<SampleIDMap> IDMapper::getSampleMap(Jazz2AnimVersion version) {
+    std::shared_ptr<SampleIDMap> map = std::make_shared<SampleIDMap>(BASE_GAME_SAMPLE_MAP);
 
-    if (jj2Version == Jazz2AnimVersion::UNKNOWN) {
-        moved.swap(wipSampleMap);
-        return moved;
+    // Go backwards, adding and removing assets that are different between versions.
+    // This order makes it easier to keep track of the exact positions.
+    if (version == Jazz2AnimVersion::TSF || version == Jazz2AnimVersion::CC) {
+        map->append({
+            {
+                { "doggy", "xmas_attack" },
+                { "doggy", "xmas_noise" },
+                { "doggy", "xmas_woof_1" },
+                { "doggy", "xmas_woof_2" },
+                { "doggy", "xmas_woof_3" }
+            },{
+                { }
+            }
+        });
+    }
+    if (version == Jazz2AnimVersion::HH || version == Jazz2AnimVersion::TSF || version == Jazz2AnimVersion::CC) {
+        map->insert(109, {
+            { "bilsy", "xmas_appear_2" },
+            { "bilsy", "xmas_snap" },
+            { "bilsy", "xmas_throw_fireball" },
+            { "bilsy", "xmas_fire_start" },
+            { "bilsy", "xmas_scary" },
+            { "bilsy", "xmas_thunder" },
+            { "bilsy", "xmas_appear_1" }
+        });
+        map->insert(110, {
+            { "lizard", "xmas_noise_1" },
+            { "lizard", "xmas_noise_2" },
+            { "lizard", "xmas_noise_3" },
+            { "lizard", "xmas_noise_4" },
+        });
+        map->insert(111, {
+            { "turtle", "xmas_attack_bite" },
+            { "turtle", "xmas_turn_start" },
+            { "turtle", "xmas_shell_collide" },
+            { "turtle", "xmas_idle_1" },
+            { "turtle", "xmas_idle_2" },
+            { "turtle", "xmas_attack_neck" },
+            { "turtle", "xmas_noise_1" },
+            { "turtle", "xmas_noise_2" },
+            { "turtle", "xmas_noise_3" },
+            { "turtle", "xmas_noise_4" },
+            { "turtle", "xmas_turn_end" }
+        });
+    }
+    if (version == Jazz2AnimVersion::TSF || version == Jazz2AnimVersion::CC) {
+        auto section = &(*(map.get()))[77];
+        section->remove(0);
+
+        map->insert(60, {});
+        map->insert(61, {});
+        map->insert(62, {
+            { "lori", "die" },
+            { "lori", "hurt_1" },
+            { "lori", "hurt_2" },
+            { "lori", "hurt_3" },
+            { "lori", "hurt_4" },
+            { "lori", "hurt_5" },
+            { "lori", "hurt_6" },
+            { "lori", "hurt_7" },
+            { "lori", "hurt_8" },
+            { "lori", "unknown_mic1" },
+            { "lori", "unknown_mic2" },
+            { "lori", "sidekick" },
+            { "lori", "fall" },
+            { "lori", "jump_1" },
+            { "lori", "jump_2" },
+            { "lori", "jump_3" },
+            { "lori", "jump_4" },
+            { "lori", "unused_touch" },
+            { "lori", "yahoo" }
+        });
+
+        map->insert(35, {
+            { "lori", "level_complete" }
+        });
     }
 
-    // TODO: U.S. version of vanilla probably has a slightly different order of sets,
-    // since the sets seem to be ordered alphabetically and the Project 2 Interactive logo
-    // position and the Gathering of Developers position would likely not agree.
-    // (existence of GoD and absence of P2 verified by https://www.youtube.com/watch?v=QB2MQQE6Bi8 -
-    // seems to have low SFX volume but otherwise genuine)
-    // Get a hold of U.S. 1.20/1.23 Anims.j2a to verify IDs and adjust accordingly.
-
-    // set 0 (all)
-    addSampleMapping("weapon", "bullet_shield_bubble_1");
-    addSampleMapping("weapon", "bullet_shield_bubble_2");
-    addSampleMapping("weapon", "unknown_bmp1");
-    addSampleMapping("weapon", "unknown_bmp2");
-    addSampleMapping("weapon", "unknown_bmp3");
-    addSampleMapping("weapon", "unknown_bmp4");
-    addSampleMapping("weapon", "unknown_bmp5");
-    addSampleMapping("weapon", "unknown_bmp6");
-    addSampleMapping("weapon", "tnt_explosion");
-    addSampleMapping("weapon", "ricochet_contact");
-    addSampleMapping("weapon", "ricochet_bullet_1");
-    addSampleMapping("weapon", "ricochet_bullet_2");
-    addSampleMapping("weapon", "ricochet_bullet_3");
-    addSampleMapping("weapon", "bullet_shield_fire_1");
-    addSampleMapping("weapon", "bullet_shield_fire_2");
-    addSampleMapping("weapon", "bullet_bouncer_1");
-    addSampleMapping("weapon", "bullet_blaster_jazz_1");
-    addSampleMapping("weapon", "bullet_blaster_jazz_2");
-    addSampleMapping("weapon", "bullet_blaster_jazz_3");
-    addSampleMapping("weapon", "bullet_bouncer_2");
-    addSampleMapping("weapon", "bullet_bouncer_3");
-    addSampleMapping("weapon", "bullet_bouncer_4");
-    addSampleMapping("weapon", "bullet_bouncer_5");
-    addSampleMapping("weapon", "bullet_bouncer_6");
-    addSampleMapping("weapon", "bullet_bouncer_7");
-    addSampleMapping("weapon", "bullet_blaster_jazz_4");
-    addSampleMapping("weapon", "bullet_pepper");
-    addSampleMapping("weapon", "bullet_freezer_1");
-    addSampleMapping("weapon", "bullet_freezer_2");
-    addSampleMapping("weapon", "bullet_freezer_upgraded_1");
-    addSampleMapping("weapon", "bullet_freezer_upgraded_2");
-    addSampleMapping("weapon", "bullet_freezer_upgraded_3");
-    addSampleMapping("weapon", "bullet_freezer_upgraded_4");
-    addSampleMapping("weapon", "bullet_freezer_upgraded_5");
-    addSampleMapping("weapon", "bullet_electro_1");
-    addSampleMapping("weapon", "bullet_electro_2");
-    addSampleMapping("weapon", "bullet_electro_3");
-    addSampleMapping("weapon", "bullet_rf");
-    addSampleMapping("weapon", "bullet_seeker");
-    addSampleMapping("weapon", "bullet_blaster_spaz_1");
-    addSampleMapping("weapon", "bullet_blaster_spaz_2");
-    addSampleMapping("weapon", "bullet_blaster_spaz_3");
-    nextSet();
-    addSampleMapping("bat", "noise");
-    nextSet(6);
-    addSampleMapping("bilsy", "appear_2");
-    addSampleMapping("bilsy", "snap");
-    addSampleMapping("bilsy", "throw_fireball");
-    addSampleMapping("bilsy", "fire_start");
-    addSampleMapping("bilsy", "scary");
-    addSampleMapping("bilsy", "thunder");
-    addSampleMapping("bilsy", "appear_1");
-    nextSet(4); // set 11 (all)
-    addSampleMapping("unknown", "unknown_bonus1");
-    addSampleMapping("unknown", "unknown_bonusblub");
-    nextSet(3);
-    addSampleMapping("bubba", "hop_1");
-    addSampleMapping("bubba", "hop_2");
-    addSampleMapping("bubba", "unknown_bubbaexplo");
-    addSampleMapping("bubba", "unknown_frog2");
-    addSampleMapping("bubba", "unknown_frog3");
-    addSampleMapping("bubba", "unknown_frog4");
-    addSampleMapping("bubba", "unknown_frog5");
-    addSampleMapping("bubba", "sneeze");
-    addSampleMapping("bubba", "tornado");
-    nextSet();
-    addSampleMapping("bee", "noise");
-    nextSet(5); // set 20 (all)
-    addSampleMapping("caterpillar", "dizzy");
-    nextSet(2);
-    addSampleMapping("common", "char_airboard");
-    addSampleMapping("common", "char_airboard_turn_1");
-    addSampleMapping("common", "char_airboard_turn_2");
-    addSampleMapping("common", "unknown_base");
-    addSampleMapping("common", "powerup_shield_damage_1");
-    addSampleMapping("common", "powerup_shield_damage_2");
-    addSampleMapping("common", "bomb");
-    addSampleMapping("birdy", "fly_1");
-    addSampleMapping("birdy", "fly_2");
-    addSampleMapping("weapon", "bouncer");
-    addSampleMapping("common", "blub1");
-    addSampleMapping("weapon", "shield_bubble_bullet");
-    addSampleMapping("weapon", "shield_fire_bullet");
-    addSampleMapping("common", "ambient_fire");
-    addSampleMapping("object", "container_barrel_break");
-    addSampleMapping("common", "powerup_shield_timer");
-    addSampleMapping("pickup", "coin");
-    addSampleMapping("common", "scenery_collapse");
-    addSampleMapping("common", "cup");
-    addSampleMapping("common", "scenery_destruct");
-    addSampleMapping("common", "down");
-    addSampleMapping("common", "downfl2");
-    addSampleMapping("pickup", "food_drink_1");
-    addSampleMapping("pickup", "food_drink_2");
-    addSampleMapping("pickup", "food_drink_3");
-    addSampleMapping("pickup", "food_drink_4");
-    addSampleMapping("pickup", "food_edible_1");
-    addSampleMapping("pickup", "food_edible_2");
-    addSampleMapping("pickup", "food_edible_3");
-    addSampleMapping("pickup", "food_edible_4");
-    addSampleMapping("pickup", "shield_lightning_bullet_1");
-    addSampleMapping("pickup", "shield_lightning_bullet_2");
-    addSampleMapping("pickup", "shield_lightning_bullet_3");
-    addSampleMapping("weapon", "tnt");
-    addSampleMapping("weapon", "wall_poof");
-    addSampleMapping("weapon", "toaster");
-    addSampleMapping("common", "flap");
-    addSampleMapping("common", "swish_9");
-    addSampleMapping("common", "swish_10");
-    addSampleMapping("common", "swish_11");
-    addSampleMapping("common", "swish_12");
-    addSampleMapping("common", "swish_13");
-    addSampleMapping("object", "gem_super_break");
-    addSampleMapping("object", "powerup_break");
-    addSampleMapping("common", "gunsm1");
-    addSampleMapping("pickup", "1up");
-    addSampleMapping("unknown", "common_head");
-    addSampleMapping("common", "copter_noise");
-    addSampleMapping("common", "hibell");
-    addSampleMapping("common", "holyflut");
-    addSampleMapping("ui", "weapon_change");
-    addSampleMapping("common", "ice_break");
-    addSampleMapping("object", "shell_noise_1");
-    addSampleMapping("object", "shell_noise_2");
-    addSampleMapping("object", "shell_noise_3");
-    addSampleMapping("object", "shell_noise_4");
-    addSampleMapping("object", "shell_noise_5");
-    addSampleMapping("object", "shell_noise_6");
-    addSampleMapping("object", "shell_noise_7");
-    addSampleMapping("object", "shell_noise_8");
-    addSampleMapping("object", "shell_noise_9");
-    addSampleMapping("unknown", "common_itemtre");
-    addSampleMapping("common", "char_jump");
-    addSampleMapping("common", "char_jump_alt");
-    addSampleMapping("common", "land1");
-    addSampleMapping("common", "land2");
-    addSampleMapping("common", "land3");
-    addSampleMapping("common", "land4");
-    addSampleMapping("common", "land5");
-    addSampleMapping("common", "char_land");
-    addSampleMapping("common", "loadjazz");
-    addSampleMapping("common", "loadspaz");
-    addSampleMapping("common", "metalhit");
-    addSampleMapping("unimplemented", "powerup_jazz1_style");
-    addSampleMapping("object", "bonus_not_enough_coins");
-    addSampleMapping("pickup", "gem");
-    addSampleMapping("pickup", "ammo");
-    addSampleMapping("common", "pistol1");
-    addSampleMapping("common", "plop_5");
-    addSampleMapping("common", "plop_1");
-    addSampleMapping("common", "plop_2");
-    addSampleMapping("common", "plop_3");
-    addSampleMapping("common", "plop_4");
-    addSampleMapping("common", "plop_6");
-    addSampleMapping("spaz", "idle_flavor_4_spaceship");
-    addSampleMapping("common", "copter_pre");
-    addSampleMapping("common", "char_revup");
-    addSampleMapping("common", "ringgun1");
-    addSampleMapping("common", "ringgun2");
-    addSampleMapping("weapon", "shield_fire_noise");
-    addSampleMapping("weapon", "shield_lightning_noise");
-    addSampleMapping("weapon", "shield_lightning_noise_2");
-    addSampleMapping("common", "shldof3");
-    addSampleMapping("common", "slip");
-    addSampleMapping("common", "splat_1");
-    addSampleMapping("common", "splat_2");
-    addSampleMapping("common", "splat_3");
-    addSampleMapping("common", "splat_4");
-    addSampleMapping("common", "splat_5");
-    addSampleMapping("common", "splat_6");
-    addSampleMapping("spring", "spring_2");
-    addSampleMapping("common", "steam_low");
-    addSampleMapping("common", "step");
-    addSampleMapping("common", "stretch");
-    addSampleMapping("common", "swish_1");
-    addSampleMapping("common", "swish_2");
-    addSampleMapping("common", "swish_3");
-    addSampleMapping("common", "swish_4");
-    addSampleMapping("common", "swish_5");
-    addSampleMapping("common", "swish_6");
-    addSampleMapping("common", "swish_7");
-    addSampleMapping("common", "swish_8");
-    addSampleMapping("common", "warp_in");
-    addSampleMapping("common", "warp_out");
-    addSampleMapping("common", "char_double_jump");
-    addSampleMapping("common", "water_splash");
-    addSampleMapping("object", "container_crate_break");
-    nextSet(2);
-    addSampleMapping("demon", "attack");
-    nextSet(3);
-    addSampleMapping("devan", "spit_fireball");
-    addSampleMapping("devan", "flap");
-    addSampleMapping("devan", "unknown_frog4");
-    addSampleMapping("devan", "jump_up");
-    addSampleMapping("devan", "laugh");
-    addSampleMapping("devan", "shoot");
-    addSampleMapping("devan", "transform_demon_stretch_2");
-    addSampleMapping("devan", "transform_demon_stretch_4");
-    addSampleMapping("devan", "transform_demon_stretch_1");
-    addSampleMapping("devan", "transform_demon_stretch_3");
-    addSampleMapping("devan", "unknown_vanish");
-    addSampleMapping("devan", "unknown_whistledescending2");
-    addSampleMapping("devan", "transform_demon_wings");
-    nextSet(2);
-    addSampleMapping("doggy", "attack");
-    addSampleMapping("doggy", "noise");
-    addSampleMapping("doggy", "woof_1");
-    addSampleMapping("doggy", "woof_2");
-    addSampleMapping("doggy", "woof_3");
-    nextSet(2); // set 31 (all)
-    addSampleMapping("dragonfly", "noise");
-    nextSet(2);
-    addSampleMapping("cinematic", "ending_eva_thankyou");
-    nextSet();
-    addSampleMapping("jazz", "level_complete");
-    nextSet(1, Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC);
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "level_complete");
-    nextSet();
-    addSampleMapping("spaz", "level_complete");
-    nextSet();
-    addSampleMapping("cinematic", "logo_epic_1");
-    addSampleMapping("cinematic", "logo_epic_2");
-    nextSet();
-    addSampleMapping("eva", "kiss_1");
-    addSampleMapping("eva", "kiss_2");
-    addSampleMapping("eva", "kiss_3");
-    addSampleMapping("eva", "kiss_4");
-    nextSet(2); // set 40 (1.24) / set 39 (1.23)
-    addSampleMapping("unknown", "unknown_fan");
-    nextSet();
-    addSampleMapping("chick", "attack_1");
-    addSampleMapping("chick", "attack_2");
-    addSampleMapping("chick", "attack_3");
-    nextSet();
-    addSampleMapping("fencer", "attack");
-    nextSet(5);
-    addSampleMapping("frog", "noise_1");
-    addSampleMapping("frog", "noise_2");
-    addSampleMapping("frog", "noise_3");
-    addSampleMapping("frog", "noise_4");
-    addSampleMapping("frog", "noise_5");
-    addSampleMapping("frog", "noise_6");
-    addSampleMapping("frog", "transform");
-    addSampleMapping("frog", "tongue");
-    nextSet(3); // set 50 (1.24) / set 49 (1.23)
-    addSampleMapping("unimplemented", "boxing_glove_hit");
-    nextSet(2);
-    addSampleMapping("mad_hatter", "cup");
-    addSampleMapping("mad_hatter", "hat");
-    addSampleMapping("mad_hatter", "spit");
-    addSampleMapping("mad_hatter", "splash_1");
-    addSampleMapping("mad_hatter", "splash_2");
-    nextSet(2);
-    addSampleMapping("cinematic", "opening_blow");
-    addSampleMapping("cinematic", "opening_boom_1");
-    addSampleMapping("cinematic", "opening_boom_2");
-    addSampleMapping("cinematic", "opening_brake");
-    addSampleMapping("cinematic", "opening_end_shoot");
-    addSampleMapping("cinematic", "opening_rope_grab");
-    addSampleMapping("cinematic", "opening_sweep_1");
-    addSampleMapping("cinematic", "opening_sweep_2");
-    addSampleMapping("cinematic", "opening_sweep_3");
-    addSampleMapping("cinematic", "opening_gun_noise_1");
-    addSampleMapping("cinematic", "opening_gun_noise_2");
-    addSampleMapping("cinematic", "opening_gun_noise_3");
-    addSampleMapping("cinematic", "opening_helicopter");
-    addSampleMapping("cinematic", "opening_hit_spaz");
-    addSampleMapping("cinematic", "opening_hit_turtle");
-    addSampleMapping("cinematic", "opening_vo_1");
-    addSampleMapping("cinematic", "opening_gun_blow");
-    addSampleMapping("cinematic", "opening_insect");
-    addSampleMapping("cinematic", "opening_trolley_push");
-    addSampleMapping("cinematic", "opening_land");
-    addSampleMapping("cinematic", "opening_turtle_growl");
-    addSampleMapping("cinematic", "opening_turtle_grunt");
-    addSampleMapping("cinematic", "opening_rock");
-    addSampleMapping("cinematic", "opening_rope_1");
-    addSampleMapping("cinematic", "opening_rope_2");
-    addSampleMapping("cinematic", "opening_run");
-    addSampleMapping("cinematic", "opening_shot");
-    addSampleMapping("cinematic", "opening_shot_grn");
-    addSampleMapping("cinematic", "opening_slide");
-    addSampleMapping("cinematic", "opening_end_sfx");
-    addSampleMapping("cinematic", "opening_swish_1");
-    addSampleMapping("cinematic", "opening_swish_2");
-    addSampleMapping("cinematic", "opening_swish_3");
-    addSampleMapping("cinematic", "opening_swish_4");
-    addSampleMapping("cinematic", "opening_turtle_ugh");
-    addSampleMapping("cinematic", "opening_up_1");
-    addSampleMapping("cinematic", "opening_up_2");
-    addSampleMapping("cinematic", "opening_wind");
-    nextSet(3);
-    addSampleMapping("jazz", "ledge");
-    addSampleMapping("jazz", "hurt_1");
-    addSampleMapping("jazz", "hurt_2");
-    addSampleMapping("jazz", "hurt_3");
-    addSampleMapping("jazz", "hurt_4");
-    addSampleMapping("jazz", "idle_flavor_3");
-    addSampleMapping("jazz", "hurt_5");
-    addSampleMapping("jazz", "hurt_6");
-    addSampleMapping("jazz", "hurt_7");
-    addSampleMapping("jazz", "hurt_8");
-    addSampleMapping("jazz", "carrot");
-    addSampleMapping("jazz", "idle_flavor_4");
-    nextSet(2);
-    addSampleMapping("lab_rat", "attack");
-    addSampleMapping("lab_rat", "noise_1");
-    addSampleMapping("lab_rat", "noise_2");
-    addSampleMapping("lab_rat", "noise_3");
-    addSampleMapping("lab_rat", "noise_4");
-    addSampleMapping("lab_rat", "noise_5");
-    nextSet(); // set 60 (1.24) / set 59 (1.23)
-    addSampleMapping("lizard", "noise_1");
-    addSampleMapping("lizard", "noise_2");
-    addSampleMapping("lizard", "noise_3");
-    addSampleMapping("lizard", "noise_4");
-    nextSet(3, Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC);
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "die");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "hurt_1");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "hurt_2");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "hurt_3");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "hurt_4");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "hurt_5");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "hurt_6");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "hurt_7");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "hurt_8");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "unknown_mic1");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "unknown_mic2");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "sidekick");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "fall");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "jump_1");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "jump_2");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "jump_3");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "jump_4");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "unused_touch");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "yahoo");
-    nextSet(3);
-    addSampleMapping("ui", "select_1");
-    addSampleMapping("ui", "select_2");
-    addSampleMapping("ui", "select_3");
-    addSampleMapping("ui", "select_4");
-    addSampleMapping("ui", "select_5");
-    addSampleMapping("ui", "select_6");
-    addSampleMapping("ui", "select_7");
-    addSampleMapping("ui", "type_char");
-    addSampleMapping("ui", "type_enter");
-    nextSet();
-    addSampleMapping("monkey", "banana_splat");
-    addSampleMapping("monkey", "banana_throw");
-    nextSet();
-    addSampleMapping("moth", "flap");
-    nextSet();
-    addSampleMapping("cinematic", "orangegames_1_boom_l");
-    addSampleMapping("cinematic", "orangegames_1_boom_r");
-    addSampleMapping("cinematic", "orangegames_7_bubble_l");
-    addSampleMapping("cinematic", "orangegames_7_bubble_r");
-    addSampleMapping("cinematic", "orangegames_2_glass_1_l");
-    addSampleMapping("cinematic", "orangegames_2_glass_1_r");
-    addSampleMapping("cinematic", "orangegames_5_glass_2_l");
-    addSampleMapping("cinematic", "orangegames_5_glass_2_r");
-    addSampleMapping("cinematic", "orangegames_6_merge");
-    addSampleMapping("cinematic", "orangegames_3_sweep_1_l");
-    addSampleMapping("cinematic", "orangegames_3_sweep_1_r");
-    addSampleMapping("cinematic", "orangegames_4_sweep_2_l");
-    addSampleMapping("cinematic", "orangegames_4_sweep_2_r");
-    addSampleMapping("cinematic", "orangegames_5_sweep_3_l");
-    addSampleMapping("cinematic", "orangegames_5_sweep_3_r");
-    nextSet(); // set 70 (1.24) / set 66 (1.23)
-    addSampleMapping("cinematic", "project2_unused_crunch");
-    addSampleMapping("cinematic", "project2_10_fart");
-    addSampleMapping("cinematic", "project2_unused_foew1");
-    addSampleMapping("cinematic", "project2_unused_foew4");
-    addSampleMapping("cinematic", "project2_unused_foew5");
-    addSampleMapping("cinematic", "project2_unused_frog1");
-    addSampleMapping("cinematic", "project2_unused_frog2");
-    addSampleMapping("cinematic", "project2_unused_frog3");
-    addSampleMapping("cinematic", "project2_unused_frog4");
-    addSampleMapping("cinematic", "project2_unused_frog5");
-    addSampleMapping("cinematic", "project2_unused_kiss4");
-    addSampleMapping("cinematic", "project2_unused_open");
-    addSampleMapping("cinematic", "project2_unused_pinch1");
-    addSampleMapping("cinematic", "project2_unused_pinch2");
-    addSampleMapping("cinematic", "project2_3_plop_1");
-    addSampleMapping("cinematic", "project2_4_plop_2");
-    addSampleMapping("cinematic", "project2_5_plop_3");
-    addSampleMapping("cinematic", "project2_6_plop_4");
-    addSampleMapping("cinematic", "project2_7_plop_5");
-    addSampleMapping("cinematic", "project2_9_spit");
-    addSampleMapping("cinematic", "project2_unused_splout");
-    addSampleMapping("cinematic", "project2_2_splat");
-    addSampleMapping("cinematic", "project2_1_8_throw");
-    addSampleMapping("cinematic", "project2_unused_tong");
-    nextSet();
-    addSampleMapping("object", "savepoint_open");
-    addSampleMapping("object", "copter");
-    addSampleMapping("unknown", "unknown_pickup_stretch1a");
-    nextSet();
-    addSampleMapping("pinball", "bumper_hit");
-    addSampleMapping("pinball", "flipper_1");
-    addSampleMapping("pinball", "flipper_2");
-    addSampleMapping("pinball", "flipper_3");
-    addSampleMapping("pinball", "flipper_4");
-    nextSet(3);
-    addSampleMapping("queen", "spring");
-    addSampleMapping("queen", "scream");
-    nextSet();
-    addSampleMapping("rapier", "die");
-    addSampleMapping("rapier", "noise_1");
-    addSampleMapping("rapier", "noise_2");
-    addSampleMapping("rapier", "noise_3");
-    addSampleMapping("rapier", "clunk");
-    nextSet(2);
-    addSampleMapping("robot", "unknown_big1");
-    addSampleMapping("robot", "unknown_big2");
-    addSampleMapping("robot", "unknown_can1");
-    addSampleMapping("robot", "unknown_can2");
-    addSampleMapping("robot", "attack_start");
-    addSampleMapping("robot", "attack_end");
-    addSampleMapping("robot", "attack");
-    addSampleMapping("robot", "unknown_hydropuf");
-    addSampleMapping("robot", "unknown_idle1");
-    addSampleMapping("robot", "unknown_idle2");
-    addSampleMapping("robot", "unknown_jmpcan1");
-    addSampleMapping("robot", "unknown_jmpcan10");
-    addSampleMapping("robot", "unknown_jmpcan2");
-    addSampleMapping("robot", "unknown_jmpcan3");
-    addSampleMapping("robot", "unknown_jmpcan4");
-    addSampleMapping("robot", "unknown_jmpcan5");
-    addSampleMapping("robot", "unknown_jmpcan6");
-    addSampleMapping("robot", "unknown_jmpcan7");
-    addSampleMapping("robot", "unknown_jmpcan8");
-    addSampleMapping("robot", "unknown_jmpcan9");
-    addSampleMapping("robot", "shrapnel_1");
-    addSampleMapping("robot", "shrapnel_2");
-    addSampleMapping("robot", "shrapnel_3");
-    addSampleMapping("robot", "shrapnel_4");
-    addSampleMapping("robot", "shrapnel_5");
-    addSampleMapping("robot", "attack_start_shutter");
-    addSampleMapping("robot", "unknown_out");
-    addSampleMapping("robot", "unknown_poep");
-    addSampleMapping("robot", "unknown_pole");
-    addSampleMapping("robot", "unknown_shoot");
-    addSampleMapping("robot", "walk_1");
-    addSampleMapping("robot", "walk_2");
-    addSampleMapping("robot", "walk_3");
-    nextSet();
-    addSampleMapping("object", "rolling_rock");
-    nextSet(2); // set 81 (1.24) / set 77 (1.23)
-    addSampleMapping(Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, "unknown", "sugar_rush_heartbeat");
-    addSampleMapping("pickup", "food_sugar_rush");
-    nextSet();
-    addSampleMapping("common", "science_noise");
-    nextSet();
-    addSampleMapping("skeleton", "bone_1");
-    addSampleMapping("skeleton", "bone_2");
-    addSampleMapping("skeleton", "bone_3");
-    addSampleMapping("skeleton", "bone_4");
-    addSampleMapping("skeleton", "bone_5");
-    addSampleMapping("skeleton", "bone_6");
-    nextSet();
-    addSampleMapping("pole", "tree_fall_1");
-    addSampleMapping("pole", "tree_fall_2");
-    addSampleMapping("pole", "tree_fall_3");
-    nextSet(2);
-    addSampleMapping("spike", "missile_1");
-    addSampleMapping("spike", "missile_2");
-    addSampleMapping("spike", "missile_3");
-    addSampleMapping("spike", "noise");
-    addSampleMapping("spike", "lock_on");
-    nextSet(6); // set 92 (1.24) / set 88 (1.23)
-    addSampleMapping("spaz", "hurt_1");
-    addSampleMapping("spaz", "hurt_2");
-    addSampleMapping("spaz", "idle_flavor_3_bird_land");
-    addSampleMapping("spaz", "idle_flavor_4");
-    addSampleMapping("spaz", "idle_flavor_3_bird");
-    addSampleMapping("spaz", "idle_flavor_3_eat");
-    addSampleMapping("spaz", "jump_1");
-    addSampleMapping("spaz", "jump_2");
-    addSampleMapping("spaz", "idle_flavor_2");
-    addSampleMapping("spaz", "hihi");
-    addSampleMapping("spaz", "spring_1");
-    addSampleMapping("spaz", "double_jump");
-    addSampleMapping("spaz", "sidekick_1");
-    addSampleMapping("spaz", "sidekick_2");
-    addSampleMapping("spaz", "spring_2");
-    addSampleMapping("spaz", "oooh");
-    addSampleMapping("spaz", "ledge");
-    addSampleMapping("spaz", "jump_3");
-    addSampleMapping("spaz", "jump_4");
-    nextSet(4);
-    addSampleMapping("spring", "spring_ver_down");
-    addSampleMapping("spring", "spring");
-    nextSet();
-    addSampleMapping("common", "steam_note");
-    nextSet();
-    addSampleMapping("unimplemented", "dizzy");
-    nextSet();
-    addSampleMapping("sucker_tube", "deflate");
-    addSampleMapping("sucker_tube", "pinch_1");
-    addSampleMapping("sucker_tube", "pinch_2");
-    addSampleMapping("sucker_tube", "pinch_3");
-    addSampleMapping("sucker_tube", "plop_1");
-    addSampleMapping("sucker_tube", "plop_2");
-    addSampleMapping("sucker_tube", "plop_3");
-    addSampleMapping("sucker_tube", "plop_4");
-    addSampleMapping("sucker_tube", "up");
-    nextSet(2); // set 101 (1.24) / set 97 (1.23)
-    addSampleMapping("tough_turtle_boss", "attack_start");
-    addSampleMapping("tough_turtle_boss", "attack_end");
-    addSampleMapping("tough_turtle_boss", "mace");
-    nextSet(2);
-    addSampleMapping("turtle", "attack_bite");
-    addSampleMapping("turtle", "turn_start");
-    addSampleMapping("turtle", "shell_collide");
-    addSampleMapping("turtle", "idle_1");
-    addSampleMapping("turtle", "idle_2");
-    addSampleMapping("turtle", "attack_neck");
-    addSampleMapping("turtle", "noise_1");
-    addSampleMapping("turtle", "noise_2");
-    addSampleMapping("turtle", "noise_3");
-    addSampleMapping("turtle", "noise_4");
-    addSampleMapping("turtle", "turn_end");
-    nextSet(2);
-    addSampleMapping("uterus", "closed_start");
-    addSampleMapping("uterus", "closed_end");
-    addSampleMapping("crab", "noise_1");
-    addSampleMapping("crab", "noise_2");
-    addSampleMapping("crab", "noise_3");
-    addSampleMapping("crab", "noise_4");
-    addSampleMapping("crab", "noise_5");
-    addSampleMapping("crab", "noise_6");
-    addSampleMapping("crab", "noise_7");
-    addSampleMapping("crab", "noise_8");
-    addSampleMapping("uterus", "scream");
-    addSampleMapping("crab", "step_1");
-    addSampleMapping("crab", "step_2");
-    nextSet(6); // set 111 (1.24) / set 107 (1.23)
-    addSampleMapping("common", "wind");
-    nextSet();
-    addSampleMapping("witch", "laugh");
-    addSampleMapping("witch", "magic");
-    nextSet(1, Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH);
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "bilsy", "xmas_appear_2");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "bilsy", "xmas_snap");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "bilsy", "xmas_throw_fireball");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "bilsy", "xmas_fire_start");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "bilsy", "xmas_scary");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "bilsy", "xmas_thunder");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "bilsy", "xmas_appear_1");
-    nextSet(1, Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH);
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "lizard", "xmas_noise_1");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "lizard", "xmas_noise_2");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "lizard", "xmas_noise_3");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "lizard", "xmas_noise_4");
-    nextSet(1, Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH);
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "turtle", "xmas_attack_bite");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "turtle", "xmas_turn_start");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "turtle", "xmas_shell_collide");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "turtle", "xmas_idle_1");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "turtle", "xmas_idle_2");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "turtle", "xmas_attack_neck");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "turtle", "xmas_noise_1");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "turtle", "xmas_noise_2");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "turtle", "xmas_noise_3");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "turtle", "xmas_noise_4");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "turtle", "xmas_turn_end");
-    nextSet(1, Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH);
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "doggy", "xmas_attack");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "doggy", "xmas_noise");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "doggy", "xmas_woof_1");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "doggy", "xmas_woof_2");
-    addSampleMapping(Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC | Jazz2AnimVersion::HH, "doggy", "xmas_woof_3");
-
-    moved.swap(wipSampleMap);
-    return moved;
+    return map;
 }
 
-IDMapper::IDMapper(const uint& version) : jj2Version(version), currentItem(0), currentSet(0) {
-}
+const AnimMapping IDMapper::EMPTY_ANIM_MAPPING = { "", "" };
+const SampleMapping IDMapper::EMPTY_SAMPLE_MAPPING = { "", "" };
+
+const AnimIDMap IDMapper::BASE_GAME_ANIM_MAP = {
+    { // 0
+        { "unknown", "flame_blue" },
+        { "common", "bomb" },
+        { "common", "smoke_poof" },
+        { "common", "explosion_rf" },
+        { "common", "explosion_small" },
+        { "common", "explosion_large" },
+        { "common", "smoke_circling_gray" },
+        { "common", "smoke_circling_brown" },
+        { "unknown", "bubble" },
+        { "unknown", "brown_thing" },
+        { "common", "explosion_pepper" },
+        { "unknown", "bullet_maybe_electro" },
+        { "unknown", "bullet_maybe_electro_trail" },
+        { "unknown", "flame_red" },
+        { "weapon", "bullet_shield_fireball" },
+        { "unknown", "flare_diag_downleft" },
+        { "unknown", "flare_hor" },
+        { "weapon", "bullet_blaster_upgraded_hor" },
+        { "ui", "blaster_upgraded_jazz" },
+        { "ui", "blaster_upgraded_spaz" },
+        { "weapon", "bullet_blaster_hor" },
+        { "weapon", "bullet_blaster_upgraded_ver" },
+        { "weapon", "bullet_blaster_ver" },
+        { "weapon", "bullet_bouncer" },
+        { "pickup", "ammo_bouncer_upgraded" },
+        { "pickup", "ammo_bouncer" },
+        { "weapon", "bullet_bouncer_upgraded" },
+        { "weapon", "bullet_freezer_hor" },
+        { "pickup", "ammo_freezer_upgraded" },
+        { "pickup", "ammo_freezer" },
+        { "weapon", "bullet_freezer_upgraded_hor" },
+        { "weapon", "bullet_freezer_ver" },
+        { "weapon", "bullet_freezer_upgraded_ver" },
+        { "pickup", "ammo_seeker_upgraded" },
+        { "pickup", "ammo_seeker" },
+        { "weapon", "bullet_seeker_ver_down" },
+        { "weapon", "bullet_seeker_diag_downright" },
+        { "weapon", "bullet_seeker_hor" },
+        { "weapon", "bullet_seeker_ver_up" },
+        { "weapon", "bullet_seeker_diag_upright" },
+        { "weapon", "bullet_seeker_upgraded_ver_down" },
+        { "weapon", "bullet_seeker_upgraded_diag_downright" },
+        { "weapon", "bullet_seeker_upgraded_hor" },
+        { "weapon", "bullet_seeker_upgraded_ver_up" },
+        { "weapon", "bullet_seeker_upgraded_diag_upright" },
+        { "weapon", "bullet_rf_hor" },
+        { "weapon", "bullet_rf_diag_downright" },
+        { "weapon", "bullet_rf_upgraded_diag_downright" },
+        { "pickup", "ammo_rf_upgraded" },
+        { "pickup", "ammo_rf" },
+        { "weapon", "bullet_rf_upgraded_hor" },
+        { "weapon", "bullet_rf_upgraded_ver" },
+        { "weapon", "bullet_rf_upgraded_diag_upright" },
+        { "weapon", "bullet_rf_ver" },
+        { "weapon", "bullet_rf_diag_upright" },
+        { "weapon", "bullet_toaster" },
+        { "pickup", "ammo_toaster_upgraded" },
+        { "pickup", "ammo_toaster" },
+        { "weapon", "bullet_toaster_upgraded" },
+        { "weapon", "bullet_tnt" },
+        { "weapon", "bullet_fireball_hor" },
+        { "pickup", "ammo_pepper_upgraded" },
+        { "pickup", "ammo_pepper" },
+        { "weapon", "bullet_fireball_upgraded_hor" },
+        { "weapon", "bullet_fireball_ver" },
+        { "weapon", "bullet_fireball_upgraded_ver" },
+        { "weapon", "bullet_bladegun" },
+        { "pickup", "ammo_electro_upgraded" },
+        { "pickup", "ammo_electro" },
+        { "weapon", "bullet_bladegun_upgraded" },
+        { "common", "explosion_tiny" },
+        { "common", "explosion_freezer_maybe" },
+        { "common", "explosion_tiny_black" },
+        { "weapon", "bullet_fireball_upgraded_hor_2" },
+        { "unknown", "flare_hor_2" },
+        { "unknown", "green_explosion" },
+        { "weapon", "bullet_bladegun_alt" },
+        { "weapon", "bullet_tnt_explosion" },
+        { "object", "container_ammo_shrapnel_1" },
+        { "object", "container_ammo_shrapnel_2" },
+        { "common", "explosion_upwards" },
+        { "common", "explosion_bomb" },
+        { "common", "smoke_circling_white" }
+    },{ // 1
+        { "bat", "idle" },
+        { "bat", "resting" },
+        { "bat", "takeoff_1" },
+        { "bat", "takeoff_2" },
+        { "bat", "roost" }
+    }, { // 2
+        { "bee", "swarm" }
+    }, { // 3
+        { "bee", "swarm_2" }
+    }, { // 4
+        { "object", "pushbox_crate" }
+    }, { // 5
+        { "object", "pushbox_rock" }
+    }, { // 6
+        { "unknown", "diamondus_tileset_tree" }
+    }, { // 7
+        { "bilsy", "throw_fireball" },
+        { "bilsy", "appear" },
+        { "bilsy", "vanish" },
+        { "bilsy", "bullet_fireball" },
+        { "bilsy", "idle" }
+    }, { // 8
+        { "birdy", "charge_diag_downright" },
+        { "birdy", "charge_ver" },
+        { "birdy", "charge_diag_upright" },
+        { "birdy", "caged" },
+        { "birdy", "cage_destroyed" },
+        { "birdy", "die" },
+        { "birdy", "feather_green" },
+        { "birdy", "feather_red" },
+        { "birdy", "feather_green_and_red" },
+        { "birdy", "fly" },
+        { "birdy", "hurt" },
+        { "birdy", "idle_worm" },
+        { "birdy", "idle_turn_head_left" },
+        { "birdy", "idle_look_left" },
+        { "birdy", "idle_turn_head_left_back" },
+        { "birdy", "idle_turn_head_right" },
+        { "birdy", "idle_look_right" },
+        { "birdy", "idle_turn_head_right_back" },
+        { "birdy", "idle" },
+        { "birdy", "corpse" }
+    }, { // 9
+        { "unimplemented", "bonus_birdy" }
+    }, { // 10
+        { "platform", "ball" },
+        { "platform", "ball_chain" }
+    }, { // 11
+        { "object", "bonus_active" },
+        { "object", "bonus_inactive" }
+    }, { // 12
+        { "ui", "boss_health_bar" }
+    }, { // 13
+        { "bridge", "rope" },
+        { "bridge", "stone" },
+        { "bridge", "vine" },
+        { "bridge", "stone_red" },
+        { "bridge", "log" },
+        { "bridge", "gem" },
+        { "bridge", "lab" }
+    }, { // 14
+        { "bubba", "spew_fireball" },
+        { "bubba", "corpse" },
+        { "bubba", "jump" },
+        { "bubba", "jump_fall" },
+        { "bubba", "fireball" },
+        { "bubba", "hop" },
+        { "bubba", "tornado" },
+        { "bubba", "tornado_start" },
+        { "bubba", "tornado_end" }
+    }, { // 15
+        { "bee", "bee" },
+        { "bee", "bee_turn" }
+    }, { // 16
+        { "unimplemented", "butterfly" }
+    }, { // 17
+        { "pole", "carrotus", CARROTUS_POLE_PALETTE }
+    }, { // 18
+        { "cheshire", "platform_appear" },
+        { "cheshire", "platform_vanish" },
+        { "cheshire", "platform_idle" },
+        { "cheshire", "platform_invisible" }
+    }, { // 19
+        { "cheshire", "hook_appear" },
+        { "cheshire", "hook_vanish" },
+        { "cheshire", "hook_idle" },
+        { "cheshire", "hook_invisible" }
+    }, { // 20
+        { "caterpillar", "exhale_start" },
+        { "caterpillar", "exhale" },
+        { "caterpillar", "disoriented" },
+        { "caterpillar", "idle" },
+        { "caterpillar", "inhale_start" },
+        { "caterpillar", "inhale" },
+        { "caterpillar", "smoke" }
+    }, { // 21
+        { "birdy_yellow", "charge_diag_downright_placeholder" },
+        { "birdy_yellow", "charge_ver" },
+        { "birdy_yellow", "charge_diag_upright" },
+        { "birdy_yellow", "caged" },
+        { "birdy_yellow", "cage_destroyed" },
+        { "birdy_yellow", "die" },
+        { "birdy_yellow", "feather_blue" },
+        { "birdy_yellow", "feather_yellow" },
+        { "birdy_yellow", "feather_blue_and_yellow" },
+        { "birdy_yellow", "fly" },
+        { "birdy_yellow", "hurt" },
+        { "birdy_yellow", "idle_worm" },
+        { "birdy_yellow", "idle_turn_head_left" },
+        { "birdy_yellow", "idle_look_left" },
+        { "birdy_yellow", "idle_turn_head_left_back" },
+        { "birdy_yellow", "idle_turn_head_right" },
+        { "birdy_yellow", "idle_look_right" },
+        { "birdy_yellow", "idle_turn_head_right_back" },
+        { "birdy_yellow", "idle" },
+        { "birdy_yellow", "corpse" }
+    }, { // 22
+        { "common", "water_bubble_1" },
+        { "common", "water_bubble_2" },
+        { "common", "water_bubble_3" },
+        { "common", "water_splash" }
+    }, { // 23
+        { "jazz", "gameover_continue" },
+        { "jazz", "gameover_idle" },
+        { "jazz", "gameover_end" },
+        { "spaz", "gameover_continue" },
+        { "spaz", "gameover_idle" },
+        { "spaz", "gameover_end" }
+    }, { // 24
+        { "demon", "idle" },
+        { "demon", "attack_start" },
+        { "demon", "attack" },
+        { "demon", "attack_end" }
+    }, { // 25
+        { "", "" },
+        { "", "" },
+        { "", "" },
+        { "", "" },
+        { "common", "ice_block" }
+    }, { // 26
+        { "devan", "bullet_small" },
+        { "devan", "remote_idle" },
+        { "devan", "remote_fall_warp_out" },
+        { "devan", "remote_fall" },
+        { "devan", "remote_fall_rotate" },
+        { "devan", "remote_fall_warp_in" },
+        { "devan", "remote_warp_out" }
+    }, { // 27
+        { "devan", "demon_spew_fireball" },
+        { "devan", "disoriented" },
+        { "devan", "freefall" },
+        { "devan", "disoriented_start" },
+        { "devan", "demon_fireball" },
+        { "devan", "demon_fly" },
+        { "devan", "demon_transform_start" },
+        { "devan", "demon_transform_end" },
+        { "devan", "disarmed_idle" },
+        { "devan", "demon_turn" },
+        { "devan", "disarmed_warp_in" },
+        { "devan", "disoriented_warp_out" },
+        { "devan", "disarmed" },
+        { "devan", "crouch" },
+        { "devan", "shoot" },
+        { "devan", "disarmed_gun" },
+        { "devan", "jump" },
+        { "devan", "bullet" },
+        { "devan", "run" },
+        { "devan", "run_end" },
+        { "devan", "jump_end" },
+        { "devan", "idle" },
+        { "devan", "warp_in" },
+        { "devan", "warp_out" }
+    }, { // 28
+        { "pole", "diamondus", DIAMONDUS_POLE_PALETTE }
+    }, { // 29
+        { "doggy", "attack" },
+        { "doggy", "walk" }
+    }, { // 30
+        { "unimplemented", "door" },
+        { "unimplemented", "door_enter_jazz_spaz" }
+    }, { // 31
+        { "dragonfly", "idle" }
+    }, { // 32
+        { "dragon", "attack" },
+        { "dragon", "idle" },
+        { "dragon", "turn" }
+    }, { // 33
+    }, { // 34
+    }, { // 35 + 1 TSFCC
+    }, { // 36
+    }, { // 37
+        { "eva", "blink" },
+        { "eva", "idle" },
+        { "eva", "kiss_start" },
+        { "eva", "kiss_end" }
+    }, { // 38
+        { "ui", "icon_birdy" },
+        { "ui", "icon_birdy_yellow" },
+        { "ui", "icon_frog" },
+        { "ui", "icon_jazz" },
+        // { Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "ui", "icon_lori" },
+        { "ui", "icon_spaz" }
+    }, { // 39
+    }, { // 40
+        { "chick", "attack" },
+        { "chick", "walk" }
+    }, { // 41
+        { "fencer", "attack" },
+        { "fencer", "idle" }
+    }, { // 42
+        { "fish", "attack" },
+        { "fish", "idle" }
+    }, { // 43
+        { "ctf", "arrow" },
+        { "ctf", "base" },
+        { "ctf", "lights" },
+        { "ctf", "flag_blue" },
+        { "ui", "ctf_flag_blue" },
+        { "ctf", "base_eva" },
+        { "ctf", "base_eva_cheer" },
+        { "ctf", "flag_red" },
+        { "ui", "ctf_flag_red" }
+    }, { // 44
+    }, { // 45
+        { "ui", "font_medium" },
+        { "ui", "font_small" },
+        { "ui", "font_large" },
+        { "ui", "logo" }
+        // { Jazz2AnimVersion::CC, "ui", "cc_logo" },
+    }, { // 46
+        { "frog", "fall_land" },
+        { "frog", "hurt" },
+        { "frog", "idle" },
+        { "jazz", "transform_frog" },
+        { "frog", "fall" },
+        { "frog", "jump_start" },
+        { "frog", "crouch" },
+        // { Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "lori", "transform_frog" },
+        { "frog", "tongue_diag_upright" },
+        { "frog", "tongue_hor" },
+        { "frog", "tongue_ver" },
+        { "spaz", "transform_frog" },
+        { "frog", "run" }
+    }, { // 47
+        { "platform", "carrotus_fruit" },
+        { "platform", "carrotus_fruit_chain" }
+    }, { // 48
+        { "pickup", "gem_gemring", GEM_PALETTE }
+    }, { // 49
+        { "unimplemented", "boxing_glove_stiff" },
+        { "unimplemented", "boxing_glove_stiff_idle" },
+        { "unimplemented", "boxing_glove_normal" },
+        { "unimplemented", "boxing_glove_normal_idle" },
+        { "unimplemented", "boxing_glove_relaxed" },
+        { "unimplemented", "boxing_glove_relaxed_idle" }
+    }, { // 50
+        { "platform", "carrotus_grass" },
+        { "platform", "carrotus_grass_chain" }
+    }, { // 51
+        { "mad_hatter", "cup" },
+        { "mad_hatter", "hat" },
+        { "mad_hatter", "attack" },
+        { "mad_hatter", "bullet_spit" },
+        { "mad_hatter", "walk" }
+    }, { // 52
+        { "helmut", "idle" },
+        { "helmut", "walk" }
+    }, { // 53
+    }, { // 54
+        { "jazz", "unused_unknown_disoriented" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "airboard" },
+        { "jazz", "airboard_turn" },
+        { "jazz", "buttstomp_end" },
+        { "jazz", "corpse" },
+        { "jazz", "die" },
+        { "jazz", "crouch_start" },
+        { "jazz", "crouch" },
+        { "jazz", "crouch_shoot" },
+        { "jazz", "crouch_end" },
+        { "jazz", "unused_door_enter" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "vine_walk" },
+        { "jazz", "eol" },
+        { "jazz", "fall" },
+        { "jazz", "buttstomp" },
+        { "jazz", "fall_end" },
+        { "jazz", "shoot" },
+        { "jazz", "shoot_ver" },
+        { "jazz", "shoot_end" },
+        { "jazz", "transform_frog_end" },
+        { "jazz", "unused_ledge_climb" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "vine_shoot_start" },
+        { "jazz", "vine_shoot_up_end" },
+        { "jazz", "vine_shoot_up" },
+        { "jazz", "vine_idle" },
+        { "jazz", "vine_idle_flavor" },
+        { "jazz", "vine_shoot_end" },
+        { "jazz", "vine_shoot" },
+        { "jazz", "copter" },
+        { "jazz", "copter_shoot_start" },
+        { "jazz", "copter_shoot" },
+        { "jazz", "pole_h" },
+        { "jazz", "hurt" },
+        { "jazz", "idle_flavor_1" },
+        { "jazz", "idle_flavor_2" },
+        { "jazz", "idle_flavor_3" },
+        { "jazz", "idle_flavor_4" },
+        { "jazz", "idle_flavor_5" },
+        { "jazz", "vine_shoot_up_start" },
+        { "jazz", "fall_shoot" },
+        { "jazz", "jump_unknown_1" },
+        { "jazz", "jump_unknown_2" },
+        { "jazz", "jump" },
+        { "jazz", "ledge" },
+        { "jazz", "lift" },
+        { "jazz", "lift_jump_light" },
+        { "jazz", "lift_jump_heavy" },
+        { "jazz", "lookup_start" },
+        { "jazz", "unused_run_diag_upright" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "unused_run_ver_up" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "unused_run_diag_upleft_reverse" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "unused_run_reverse" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "unused_run_diag_downleft_reverse" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "unused_run_ver_down" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "unused_run_diag_downright" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "dizzy_walk" },
+        { "jazz", "push" },
+        { "jazz", "shoot_start" },
+        { "jazz", "revup_start" },
+        { "jazz", "revup" },
+        { "jazz", "revup_end" },
+        { "jazz", "fall_diag" },
+        { "jazz", "unused_unknown_mid_frame" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "jump_diag" },
+        { "jazz", "unused_jump_shoot_end" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "unused_jump_shoot_ver_start" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "unused_jump_shoot_ver" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "ball" },
+        { "jazz", "run" },
+        { "jazz", "unused_run_aim_diag" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "dash_start" },
+        { "jazz", "dash" },
+        { "jazz", "dash_stop" },
+        { "jazz", "walk_stop" },
+        { "jazz", "run_stop" },
+        { "jazz", "spring" },
+        { "jazz", "idle" },
+        { "jazz", "uppercut" },
+        { "jazz", "uppercut_end" },
+        { "jazz", "uppercut_start" },
+        { "jazz", "dizzy" },
+        { "jazz", "swim_diag_downright" },
+        { "jazz", "swim_right" },
+        { "jazz", "swim_diag_right_to_downright" },
+        { "jazz", "swim_diag_right_to_upright" },
+        { "jazz", "swim_diag_upright" },
+        { "jazz", "swing" },
+        { "jazz", "warp_in" },
+        { "jazz", "warp_out_freefall" },
+        { "jazz", "freefall" },
+        { "jazz", "warp_in_freefall" },
+        { "jazz", "warp_out" },
+        { "jazz", "pole_v" },
+        { "jazz", "unused_unarmed_crouch_start" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "unused_unarmed_crouch_end" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "unused_unarmed_fall" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "unused_unarmed_hurt" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "unused_unarmed_idle" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "unused_unarmed_jump" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "unused_unarmed_crouch_end_2" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "unused_lookup_start" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "unused_unarmed_run" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "unused_unarmed_stare" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "jazz", "unused_lookup_start_2" } //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+    }, { // 55
+        { "unimplemented", "bonus_jazz_idle_flavor_2" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "unimplemented", "bonus_jazz_jump_2" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "unimplemented", "bonus_jazz_dash_2" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "unimplemented", "bonus_jazz_rotate_2" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "unimplemented", "bonus_jazz_ball_2" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "unimplemented", "bonus_jazz_run_2" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "unimplemented", "bonus_jazz_idle_2" }, //Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH, 
+        { "unimplemented", "bonus_jazz_idle_flavor" },
+        { "unimplemented", "bonus_jazz_jump" },
+        { "unimplemented", "bonus_jazz_ball" },
+        { "unimplemented", "bonus_jazz_run" },
+        { "unimplemented", "bonus_jazz_dash" },
+        { "unimplemented", "bonus_jazz_rotate" },
+        { "unimplemented", "bonus_jazz_idle" }
+    }, { // 56
+    }, { // 57
+        { "pole", "jungle", JUNGLE_POLE_PALETTE }
+    }, { // 58
+        { "lab_rat", "attack" },
+        { "lab_rat", "idle" },
+        { "lab_rat", "walk" }
+    }, { // 59
+        { "lizard", "copter_attack" },
+        { "lizard", "bomb" },
+        { "lizard", "copter_idle" },
+        { "lizard", "copter" },
+        { "lizard", "walk" }
+    }, { // 60 + 3 TSFCC (Lori)
+        { "ui", "multiplayer_char", MENU_PALETTE },
+        { "ui", "multiplayer_color", MENU_PALETTE },
+        { "ui", "character_art_difficulty_jazz", MENU_PALETTE },
+        //{ Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "ui", "character_art_difficulty_lori", MENU_PALETTE },
+        { "ui", "character_art_difficulty_spaz", MENU_PALETTE },
+        { "unimplemented", "key", MENU_PALETTE },
+        { "ui", "loading_bar", MENU_PALETTE },
+        { "ui", "multiplayer_mode", MENU_PALETTE },
+        { "ui", "character_name_jazz", MENU_PALETTE },
+        //{ Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "ui", "character_name_lori", MENU_PALETTE },
+        { "ui", "character_name_spaz", MENU_PALETTE },
+        { "ui", "character_art_jazz", MENU_PALETTE },
+        //{ Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "ui", "character_art_lori", MENU_PALETTE },
+        { "ui", "character_art_spaz", MENU_PALETTE }
+    }, { // 61
+        { "ui", "font_medium_2", MENU_PALETTE },
+        { "ui", "font_small_2", MENU_PALETTE },
+        { "ui", "logo_large", MENU_PALETTE },
+        //{ Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "ui", "tsf_title", MENU_PALETTE },
+        //{ Jazz2AnimVersion::CC, "ui", "menu_snow", MENU_PALETTE },
+        { "ui", "logo_small", MENU_PALETTE },
+        //{ Jazz2AnimVersion::CC, "ui", "cc_title", MENU_PALETTE },
+        //{ Jazz2AnimVersion::CC, "ui", "cc_title_small", MENU_PALETTE }
+    }, { // 62
+    }, { // 63
+        { "monkey", "banana" },
+        { "monkey", "banana_splat" },
+        { "monkey", "jump" },
+        { "monkey", "walk_start" },
+        { "monkey", "walk_end" },
+        { "monkey", "attack" },
+        { "monkey", "walk" }
+    }, { // 64
+        { "moth", "green" },
+        { "moth", "gray" },
+        { "moth", "purple" },
+        { "moth", "pink" }
+    }, { // 65
+    }, { // 66
+    }, { // 67
+        { "pickup", "1up" },
+        { "pickup", "food_apple" },
+        { "pickup", "food_banana" },
+        { "object", "container_barrel" },
+        { "common", "poof_brown" },
+        { "object", "container_box_crush" },
+        { "object", "container_barrel_shrapnel_1" },
+        { "object", "container_barrel_shrapnel_2" },
+        { "object", "container_barrel_shrapnel_3" },
+        { "object", "container_barrel_shrapnel_4" },
+        { "object", "powerup_shield_bubble" },
+        { "pickup", "food_burger" },
+        { "pickup", "food_cake" },
+        { "pickup", "food_candy" },
+        { "object", "savepoint" },
+        { "pickup", "food_cheese" },
+        { "pickup", "food_cherry" },
+        { "pickup", "food_chicken" },
+        { "pickup", "food_chips" },
+        { "pickup", "food_chocolate" },
+        { "pickup", "food_cola" },
+        { "pickup", "carrot" },
+        { "pickup", "gem", GEM_PALETTE },
+        { "pickup", "food_cucumber" },
+        { "pickup", "food_cupcake" },
+        { "pickup", "food_donut" },
+        { "pickup", "food_eggplant" },
+        { "unknown", "green_blast_thing" },
+        { "object", "exit_sign" },
+        { "pickup", "fast_fire_jazz" },
+        { "pickup", "fast_fire_spaz" },
+        { "object", "powerup_shield_fire" },
+        { "pickup", "food_fries" },
+        { "pickup", "fast_feet" },
+        { "object", "gem_super", GEM_PALETTE },
+        { "pickup", "gem_2", GEM_PALETTE },
+        { "pickup", "airboard" },
+        { "pickup", "coin_gold" },
+        { "pickup", "food_grapes" },
+        { "pickup", "food_ham" },
+        { "pickup", "carrot_fly" },
+        { "ui", "heart" },
+        { "pickup", "freeze_enemies" },
+        { "pickup", "food_ice_cream" },
+        { "common", "ice_break_shrapnel_1" },
+        { "common", "ice_break_shrapnel_2" },
+        { "common", "ice_break_shrapnel_3" },
+        { "common", "ice_break_shrapnel_4" },
+        { "pickup", "food_lemon" },
+        { "pickup", "food_lettuce" },
+        { "pickup", "food_lime" },
+        { "object", "powerup_shield_lightning" },
+        { "object", "trigger_crate" },
+        { "pickup", "food_milk" },
+        { "object", "crate_ammo_bouncer" },
+        { "object", "crate_ammo_freezer" },
+        { "object", "crate_ammo_seeker" },
+        { "object", "crate_ammo_rf" },
+        { "object", "crate_ammo_toaster" },
+        { "object", "crate_ammo_tnt" },
+        { "object", "powerup_upgrade_blaster_jazz" },
+        { "object", "powerup_upgrade_bouncer" },
+        { "object", "powerup_upgrade_freezer" },
+        { "object", "powerup_upgrade_seeker" },
+        { "object", "powerup_upgrade_rf" },
+        { "object", "powerup_upgrade_toaster" },
+        { "object", "powerup_upgrade_pepper" },
+        { "object", "powerup_upgrade_electro" },
+        { "object", "powerup_transform_birdy" },
+        { "object", "powerup_transform_birdy_yellow" },
+        { "object", "powerup_swap_characters" },
+        { "pickup", "food_orange" },
+        { "pickup", "carrot_invincibility" },
+        { "pickup", "food_peach" },
+        { "pickup", "food_pear" },
+        { "pickup", "food_soda" },
+        { "pickup", "food_pie" },
+        { "pickup", "food_pizza" },
+        { "pickup", "potion" },
+        { "pickup", "food_pretzel" },
+        { "pickup", "food_sandwich" },
+        { "pickup", "food_strawberry" },
+        { "pickup", "carrot_full" },
+        { "object", "powerup_upgrade_blaster_spaz" },
+        { "pickup", "coin_silver" },
+        { "unknown", "green_blast_thing_2" },
+        { "common", "generator" },
+        { "pickup", "stopwatch" },
+        { "pickup", "food_taco" },
+        { "pickup", "food_thing" },
+        { "object", "tnt" },
+        { "pickup", "food_hotdog" },
+        { "pickup", "food_watermelon" },
+        { "object", "container_crate_shrapnel_1" },
+        { "object", "container_crate_shrapnel_2" }
+    }, { // 68
+        { "pinball", "bumper_500", PINBALL_PALETTE },
+        { "pinball", "bumper_500_hit", PINBALL_PALETTE },
+        { "pinball", "bumper_carrot", PINBALL_PALETTE },
+        { "pinball", "bumper_carrot_hit", PINBALL_PALETTE },
+        { "pinball", "paddle_left" },
+        { "pinball", "paddle_right" }
+    }, { // 69
+        { "platform", "lab" },
+        { "platform", "lab_chain" }
+    }, { // 70
+        { "pole", "psych", PSYCH_POLE_PALETTE }
+    }, { // 71
+        { "queen", "scream" },
+        { "queen", "ledge" },
+        { "queen", "ledge_recover" },
+        { "queen", "idle" },
+        { "queen", "brick" },
+        { "queen", "fall" },
+        { "queen", "stomp" },
+        { "queen", "backstep" }
+    }, { // 72
+        { "rapier", "attack" },
+        { "rapier", "attack_swing" },
+        { "rapier", "idle" },
+        { "rapier", "attack_start" },
+        { "rapier", "attack_end" }
+    }, { // 73
+        { "raven", "attack" },
+        { "raven", "idle" },
+        { "raven", "turn" }
+    }, { // 74
+        { "robot", "spike_ball" },
+        { "robot", "attack_start" },
+        { "robot", "attack" },
+        { "robot", "copter" },
+        { "robot", "idle" },
+        { "robot", "attack_end" },
+        { "robot", "shrapnel_1" },
+        { "robot", "shrapnel_2" },
+        { "robot", "shrapnel_3" },
+        { "robot", "shrapnel_4" },
+        { "robot", "shrapnel_5" },
+        { "robot", "shrapnel_6" },
+        { "robot", "shrapnel_7" },
+        { "robot", "shrapnel_8" },
+        { "robot", "shrapnel_9" },
+        { "robot", "run" },
+        { "robot", "copter_start" },
+        { "robot", "copter_end" }
+    }, { // 75
+        { "object", "rolling_rock" }
+    }, { // 76
+        { "rocket_turtle", "downright" },
+        { "rocket_turtle", "upright" },
+        { "rocket_turtle", "smoke" },
+        { "rocket_turtle", "upright_to_downright" }
+    }, { // 77
+    }, { // 78
+    }, { // 79
+        { "skeleton", "bone" },
+        { "skeleton", "skull" },
+        { "skeleton", "walk" }
+    }, { // 80
+        { "pole", "diamondus_tree", DIAMONDUS_POLE_PALETTE }
+    }, { // 81
+        { "common", "snow", SNOW_PALETTE }
+    }, { // 82
+        { "spike", "rocket" },
+        { "spike", "mace_chain" },
+        { "spike", "bottom" },
+        { "spike", "top" },
+        { "spike", "puff" },
+        { "spike", "mace" },
+        { "spike", "turret" },
+        { "spike", "crosshairs" }
+    }, { // 83
+        { "platform", "sonic" },
+        { "platform", "sonic_chain" }
+    }, { // 84
+        { "sparks", "idle" }
+    }, { // 85
+        { "spaz", "unused_unknown_disoriented" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "airboard" },
+        { "spaz", "airboard_turn" },
+        { "spaz", "buttstomp_end" },
+        { "spaz", "corpse" },
+        { "spaz", "die" },
+        { "spaz", "crouch_start" },
+        { "spaz", "crouch_shoot_2" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        //{ Jazz2AnimVersion::TSF | Jazz2AnimVersion::CC, "spaz", "crouch" },
+        { "spaz", "crouch_shoot" },
+        { "spaz", "crouch_end" },
+        { "spaz", "unused_door_enter" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "vine_walk" },
+        { "spaz", "eol" },
+        { "spaz", "fall" },
+        { "spaz", "buttstomp" },
+        { "spaz", "fall_end" },
+        { "spaz", "shoot" },
+        { "spaz", "shoot_ver" },
+        { "spaz", "shoot_end" },
+        { "spaz", "transform_frog_end" },
+        { "spaz", "unused_ledge_climb" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "vine_shoot_start" },
+        { "spaz", "vine_shoot_up_end" },
+        { "spaz", "vine_shoot_up" },
+        { "spaz", "vine_idle" },
+        { "spaz", "vine_idle_flavor" },
+        { "spaz", "vine_shoot_end" },
+        { "spaz", "vine_shoot" },
+        { "spaz", "copter" },
+        { "spaz", "copter_shoot_start" },
+        { "spaz", "copter_shoot" },
+        { "spaz", "pole_h" },
+        { "spaz", "hurt" },
+        { "spaz", "idle_flavor_1" },
+        { "spaz", "idle_flavor_2" },
+        { "spaz", "idle_flavor_3_placeholder" },
+        { "spaz", "idle_flavor_4" },
+        { "spaz", "idle_flavor_5" },
+        { "spaz", "vine_shoot_up_start" },
+        { "spaz", "fall_shoot" },
+        { "spaz", "jump_unknown_1" },
+        { "spaz", "jump_unknown_2" },
+        { "spaz", "jump" },
+        { "spaz", "ledge" },
+        { "spaz", "lift" },
+        { "spaz", "lift_jump_light" },
+        { "spaz", "lift_jump_heavy" },
+        { "spaz", "lookup_start" },
+        { "spaz", "unused_run_diag_upright" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "unused_run_ver_up" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "unused_run_diag_upleft_reverse" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "unused_run_reverse" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "unused_run_diag_downleft_reverse" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "unused_run_ver_down" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "unused_run_diag_downright" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "dizzy_walk" },
+        { "spaz", "push" },
+        { "spaz", "shoot_start" },
+        { "spaz", "revup_start" },
+        { "spaz", "revup" },
+        { "spaz", "revup_end" },
+        { "spaz", "fall_diag" },
+        { "spaz", "unused_unknown_mid_frame" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "jump_diag" },
+        { "spaz", "unused_jump_shoot_end" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "unused_jump_shoot_ver_start" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "unused_jump_shoot_ver" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "ball" },
+        { "spaz", "run" },
+        { "spaz", "unused_run_aim_diag" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "dash_start" },
+        { "spaz", "dash" },
+        { "spaz", "dash_stop" },
+        { "spaz", "walk_stop" },
+        { "spaz", "run_stop" },
+        { "spaz", "spring" },
+        { "spaz", "idle" },
+        { "spaz", "sidekick" },
+        { "spaz", "sidekick_end" },
+        { "spaz", "sidekick_start" },
+        { "spaz", "dizzy" },
+        { "spaz", "swim_diag_downright" },
+        { "spaz", "swim_right" },
+        { "spaz", "swim_diag_right_to_downright" },
+        { "spaz", "swim_diag_right_to_upright" },
+        { "spaz", "swim_diag_upright" },
+        { "spaz", "swing" },
+        { "spaz", "warp_in" },
+        { "spaz", "warp_out_freefall" },
+        { "spaz", "freefall" },
+        { "spaz", "warp_in_freefall" },
+        { "spaz", "warp_out" },
+        { "spaz", "pole_v" },
+        { "spaz", "unused_unarmed_crouch_start" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "unused_unarmed_crouch_end" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "unused_unarmed_fall" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "unused_unarmed_hurt" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "unused_unarmed_idle" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "unused_unarmed_jump" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "unused_unarmed_crouch_end_2" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "unused_lookup_start" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "unused_unarmed_run" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "unused_unarmed_stare" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "spaz", "unused_lookup_start_2" } // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+    }, { // 86
+        { "spaz", "idle_flavor_3_start" },
+        { "spaz", "idle_flavor_3" },
+        { "spaz", "idle_flavor_3_bird" },
+        { "spaz", "idle_flavor_5_spaceship" }
+    }, { // 87
+        { "unimplemented", "bonus_spaz_idle_flavor" },
+        { "unimplemented", "bonus_spaz_jump" },
+        { "unimplemented", "bonus_spaz_ball" },
+        { "unimplemented", "bonus_spaz_run" },
+        { "unimplemented", "bonus_spaz_dash" },
+        { "unimplemented", "bonus_spaz_rotate" },
+        { "unimplemented", "bonus_spaz_idle" }
+    }, { // 88
+    }, { // 89
+        { "object", "3d_spike" },
+        { "object", "3d_spike_chain" }
+    }, { // 90
+        { "object", "3d_spike_2" },
+        { "object", "3d_spike_2_chain" }
+    }, { // 91
+        { "platform", "spike" },
+        { "platform", "spike_chain" }
+    }, { // 92
+        { "object", "spring_blue_ver" },
+        { "object", "spring_blue_hor" },
+        { "object", "spring_blue_ver_reverse" },
+        { "object", "spring_green_ver_reverse" },
+        { "object", "spring_red_ver_reverse" },
+        { "object", "spring_green_ver" },
+        { "object", "spring_green_hor" },
+        { "object", "spring_red_ver" },
+        { "object", "spring_red_hor" }
+    }, { // 93
+        { "common", "steam_note" }
+    }, { // 94
+    }, { // 95
+        { "sucker_tube", "walk_top" },
+        { "sucker_tube", "inflated_deflate" },
+        { "sucker_tube", "walk_ver_down" },
+        { "sucker_tube", "fall" },
+        { "sucker_tube", "inflated" },
+        { "sucker_tube", "poof" },
+        { "sucker_tube", "walk" },
+        { "sucker_tube", "walk_ver_up" }
+    }, { // 96
+        { "tube_turtle", "idle" }
+    }, { // 97
+        { "tough_turtle_boss", "attack_start" },
+        { "tough_turtle_boss", "attack_end" },
+        { "tough_turtle_boss", "shell" },
+        { "tough_turtle_boss", "mace" },
+        { "tough_turtle_boss", "idle" },
+        { "tough_turtle_boss", "walk" }
+    }, { // 98
+        { "tough_turtle", "walk" }
+    }, { // 99
+        { "turtle", "attack" },
+        { "turtle", "idle_flavor" },
+        { "turtle", "turn_start" },
+        { "turtle", "turn_end" },
+        { "turtle", "shell_reverse" },
+        { "turtle", "shell" },
+        { "turtle", "idle" },
+        { "turtle", "walk" }
+    }, { // 100
+        { "tweedle", "magnet_start" },
+        { "tweedle", "spin" },
+        { "tweedle", "magnet_end" },
+        { "tweedle", "shoot_jazz" },
+        { "tweedle", "shoot_spaz" },
+        { "tweedle", "hurt" },
+        { "tweedle", "idle" },
+        { "tweedle", "magnet" },
+        { "tweedle", "walk" }
+    }, { // 101
+        { "uterus", "closed_start" },
+        { "uterus", "crab_spawn" },
+        { "uterus", "closed_idle" },
+        { "uterus", "idle" },
+        { "crab", "fall_end" },
+        { "uterus", "closed_end" },
+        { "uterus", "shield" },
+        { "crab", "walk" }
+    }, { // 102
+        { "object", "vine_mask" },
+        { "object", "vine" }
+    }, { // 103
+        { "object", "bonus_10" }
+    }, { // 104
+        { "object", "bonus_100" }
+    }, { // 105
+        { "object", "bonus_20" }
+    }, { // 106
+        { "object", "bonus_50" }
+    }, { // 107
+    }, { // 108
+        { "witch", "attack" },
+        { "witch", "die" },
+        { "witch", "idle" },
+        { "witch", "bullet_magic" }
+    }
+};
+
+const SampleIDMap IDMapper::BASE_GAME_SAMPLE_MAP = {
+    { // 0
+        { "weapon", "bullet_shield_bubble_1" },
+        { "weapon", "bullet_shield_bubble_2" },
+        { "weapon", "unknown_bmp1" },
+        { "weapon", "unknown_bmp2" },
+        { "weapon", "unknown_bmp3" },
+        { "weapon", "unknown_bmp4" },
+        { "weapon", "unknown_bmp5" },
+        { "weapon", "unknown_bmp6" },
+        { "weapon", "tnt_explosion" },
+        { "weapon", "ricochet_contact" },
+        { "weapon", "ricochet_bullet_1" },
+        { "weapon", "ricochet_bullet_2" },
+        { "weapon", "ricochet_bullet_3" },
+        { "weapon", "bullet_shield_fire_1" },
+        { "weapon", "bullet_shield_fire_2" },
+        { "weapon", "bullet_bouncer_1" },
+        { "weapon", "bullet_blaster_jazz_1" },
+        { "weapon", "bullet_blaster_jazz_2" },
+        { "weapon", "bullet_blaster_jazz_3" },
+        { "weapon", "bullet_bouncer_2" },
+        { "weapon", "bullet_bouncer_3" },
+        { "weapon", "bullet_bouncer_4" },
+        { "weapon", "bullet_bouncer_5" },
+        { "weapon", "bullet_bouncer_6" },
+        { "weapon", "bullet_bouncer_7" },
+        { "weapon", "bullet_blaster_jazz_4" },
+        { "weapon", "bullet_pepper" },
+        { "weapon", "bullet_freezer_1" },
+        { "weapon", "bullet_freezer_2" },
+        { "weapon", "bullet_freezer_upgraded_1" },
+        { "weapon", "bullet_freezer_upgraded_2" },
+        { "weapon", "bullet_freezer_upgraded_3" },
+        { "weapon", "bullet_freezer_upgraded_4" },
+        { "weapon", "bullet_freezer_upgraded_5" },
+        { "weapon", "bullet_electro_1" },
+        { "weapon", "bullet_electro_2" },
+        { "weapon", "bullet_electro_3" },
+        { "weapon", "bullet_rf" },
+        { "weapon", "bullet_seeker" },
+        { "weapon", "bullet_blaster_spaz_1" },
+        { "weapon", "bullet_blaster_spaz_2" },
+        { "weapon", "bullet_blaster_spaz_3" }
+    },{ // 1
+        { "bat", "noise" }
+    },{ // 2
+    },{ // 3
+    },{ // 4
+    },{ // 5
+    },{ // 6
+    },{ // 7
+        { "bilsy", "appear_2" },
+        { "bilsy", "snap" },
+        { "bilsy", "throw_fireball" },
+        { "bilsy", "fire_start" },
+        { "bilsy", "scary" },
+        { "bilsy", "thunder" },
+        { "bilsy", "appear_1" }
+    },{ // 8
+    },{ // 9
+    },{ // 10
+    },{ // 11
+        { "unknown", "unknown_bonus1" },
+        { "unknown", "unknown_bonusblub" }
+    },{ // 12
+    },{ // 13
+    },{ // 14
+        { "bubba", "hop_1" },
+        { "bubba", "hop_2" },
+        { "bubba", "unknown_bubbaexplo" },
+        { "bubba", "unknown_frog2" },
+        { "bubba", "unknown_frog3" },
+        { "bubba", "unknown_frog4" },
+        { "bubba", "unknown_frog5" },
+        { "bubba", "sneeze" },
+        { "bubba", "tornado" }
+    },{ // 15
+        { "bee", "noise" }
+    },{ // 16
+    },{ // 17
+    },{ // 18
+    },{ // 19
+    },{ // 20
+        { "caterpillar", "dizzy" }
+    },{ // 21
+    },{ // 22
+        { "common", "char_airboard" },
+        { "common", "char_airboard_turn_1" },
+        { "common", "char_airboard_turn_2" },
+        { "common", "unknown_base" },
+        { "common", "powerup_shield_damage_1" },
+        { "common", "powerup_shield_damage_2" },
+        { "common", "bomb" },
+        { "birdy", "fly_1" },
+        { "birdy", "fly_2" },
+        { "weapon", "bouncer" },
+        { "common", "blub1" },
+        { "weapon", "shield_bubble_bullet" },
+        { "weapon", "shield_fire_bullet" },
+        { "common", "ambient_fire" },
+        { "object", "container_barrel_break" },
+        { "common", "powerup_shield_timer" },
+        { "pickup", "coin" },
+        { "common", "scenery_collapse" },
+        { "common", "cup" },
+        { "common", "scenery_destruct" },
+        { "common", "down" },
+        { "common", "downfl2" },
+        { "pickup", "food_drink_1" },
+        { "pickup", "food_drink_2" },
+        { "pickup", "food_drink_3" },
+        { "pickup", "food_drink_4" },
+        { "pickup", "food_edible_1" },
+        { "pickup", "food_edible_2" },
+        { "pickup", "food_edible_3" },
+        { "pickup", "food_edible_4" },
+        { "pickup", "shield_lightning_bullet_1" },
+        { "pickup", "shield_lightning_bullet_2" },
+        { "pickup", "shield_lightning_bullet_3" },
+        { "weapon", "tnt" },
+        { "weapon", "wall_poof" },
+        { "weapon", "toaster" },
+        { "common", "flap" },
+        { "common", "swish_9" },
+        { "common", "swish_10" },
+        { "common", "swish_11" },
+        { "common", "swish_12" },
+        { "common", "swish_13" },
+        { "object", "gem_super_break" },
+        { "object", "powerup_break" },
+        { "common", "gunsm1" },
+        { "pickup", "1up" },
+        { "unknown", "common_head" },
+        { "common", "copter_noise" },
+        { "common", "hibell" },
+        { "common", "holyflut" },
+        { "ui", "weapon_change" },
+        { "common", "ice_break" },
+        { "object", "shell_noise_1" },
+        { "object", "shell_noise_2" },
+        { "object", "shell_noise_3" },
+        { "object", "shell_noise_4" },
+        { "object", "shell_noise_5" },
+        { "object", "shell_noise_6" },
+        { "object", "shell_noise_7" },
+        { "object", "shell_noise_8" },
+        { "object", "shell_noise_9" },
+        { "unknown", "common_itemtre" },
+        { "common", "char_jump" },
+        { "common", "char_jump_alt" },
+        { "common", "land1" },
+        { "common", "land2" },
+        { "common", "land3" },
+        { "common", "land4" },
+        { "common", "land5" },
+        { "common", "char_land" },
+        { "common", "loadjazz" },
+        { "common", "loadspaz" },
+        { "common", "metalhit" },
+        { "unimplemented", "powerup_jazz1_style" },
+        { "object", "bonus_not_enough_coins" },
+        { "pickup", "gem" },
+        { "pickup", "ammo" },
+        { "common", "pistol1" },
+        { "common", "plop_5" },
+        { "common", "plop_1" },
+        { "common", "plop_2" },
+        { "common", "plop_3" },
+        { "common", "plop_4" },
+        { "common", "plop_6" },
+        { "spaz", "idle_flavor_4_spaceship" },
+        { "common", "copter_pre" },
+        { "common", "char_revup" },
+        { "common", "ringgun1" },
+        { "common", "ringgun2" },
+        { "weapon", "shield_fire_noise" },
+        { "weapon", "shield_lightning_noise" },
+        { "weapon", "shield_lightning_noise_2" },
+        { "common", "shldof3" },
+        { "common", "slip" },
+        { "common", "splat_1" },
+        { "common", "splat_2" },
+        { "common", "splat_3" },
+        { "common", "splat_4" },
+        { "common", "splat_5" },
+        { "common", "splat_6" },
+        { "spring", "spring_2" },
+        { "common", "steam_low" },
+        { "common", "step" },
+        { "common", "stretch" },
+        { "common", "swish_1" },
+        { "common", "swish_2" },
+        { "common", "swish_3" },
+        { "common", "swish_4" },
+        { "common", "swish_5" },
+        { "common", "swish_6" },
+        { "common", "swish_7" },
+        { "common", "swish_8" },
+        { "common", "warp_in" },
+        { "common", "warp_out" },
+        { "common", "char_double_jump" },
+        { "common", "water_splash" },
+        { "object", "container_crate_break" }
+    },{ // 23
+    },{ // 24
+        { "demon", "attack" }
+    },{ // 25
+    },{ // 26
+    },{ // 27
+        { "devan", "spit_fireball" },
+        { "devan", "flap" },
+        { "devan", "unknown_frog4" },
+        { "devan", "jump_up" },
+        { "devan", "laugh" },
+        { "devan", "shoot" },
+        { "devan", "transform_demon_stretch_2" },
+        { "devan", "transform_demon_stretch_4" },
+        { "devan", "transform_demon_stretch_1" },
+        { "devan", "transform_demon_stretch_3" },
+        { "devan", "unknown_vanish" },
+        { "devan", "unknown_whistledescending2" },
+        { "devan", "transform_demon_wings" }
+    },{ // 28
+    },{ // 29
+        { "doggy", "attack" },
+        { "doggy", "noise" },
+        { "doggy", "woof_1" },
+        { "doggy", "woof_2" },
+        { "doggy", "woof_3" }
+    },{ // 30
+    },{ // 31
+        { "dragonfly", "noise" }
+    },{ // 32
+    },{ // 33
+        { "cinematic", "ending_eva_thankyou" }
+    },{ // 34
+        { "jazz", "level_complete" }
+    },{ // 35 + 1 TSFCC
+        { "spaz", "level_complete" }
+    },{ // 36
+        { "cinematic", "logo_epic_1" },
+        { "cinematic", "logo_epic_2" }
+    },{ // 37
+        { "eva", "blink" },
+        { "eva", "idle" },
+        { "eva", "kiss_start" },
+        { "eva", "kiss_end" }
+    },{ // 38
+    },{ // 39
+        { "unknown", "unknown_fan" }
+    },{ // 40
+        { "chick", "attack_1" },
+        { "chick", "attack_2" },
+        { "chick", "attack_3" }
+    },{ // 41
+        { "fencer", "attack" }
+    },{ // 42
+    },{ // 43
+    },{ // 44
+    },{ // 45
+    },{ // 46
+        { "frog", "noise_1" },
+        { "frog", "noise_2" },
+        { "frog", "noise_3" },
+        { "frog", "noise_4" },
+        { "frog", "noise_5" },
+        { "frog", "noise_6" },
+        { "frog", "transform" },
+        { "frog", "tongue" }
+    },{ // 47
+    },{ // 48
+    },{ // 49
+        { "unimplemented", "boxing_glove_hit" }
+    },{ // 50
+    },{ // 51
+        { "mad_hatter", "cup" },
+        { "mad_hatter", "hat" },
+        { "mad_hatter", "spit" },
+        { "mad_hatter", "splash_1" },
+        { "mad_hatter", "splash_2" }
+    },{ // 52
+    },{ // 53
+        { "cinematic", "opening_blow" },
+        { "cinematic", "opening_boom_1" },
+        { "cinematic", "opening_boom_2" },
+        { "cinematic", "opening_brake" },
+        { "cinematic", "opening_end_shoot" },
+        { "cinematic", "opening_rope_grab" },
+        { "cinematic", "opening_sweep_1" },
+        { "cinematic", "opening_sweep_2" },
+        { "cinematic", "opening_sweep_3" },
+        { "cinematic", "opening_gun_noise_1" },
+        { "cinematic", "opening_gun_noise_2" },
+        { "cinematic", "opening_gun_noise_3" },
+        { "cinematic", "opening_helicopter" },
+        { "cinematic", "opening_hit_spaz" },
+        { "cinematic", "opening_hit_turtle" },
+        { "cinematic", "opening_vo_1" },
+        { "cinematic", "opening_gun_blow" },
+        { "cinematic", "opening_insect" },
+        { "cinematic", "opening_trolley_push" },
+        { "cinematic", "opening_land" },
+        { "cinematic", "opening_turtle_growl" },
+        { "cinematic", "opening_turtle_grunt" },
+        { "cinematic", "opening_rock" },
+        { "cinematic", "opening_rope_1" },
+        { "cinematic", "opening_rope_2" },
+        { "cinematic", "opening_run" },
+        { "cinematic", "opening_shot" },
+        { "cinematic", "opening_shot_grn" },
+        { "cinematic", "opening_slide" },
+        { "cinematic", "opening_end_sfx" },
+        { "cinematic", "opening_swish_1" },
+        { "cinematic", "opening_swish_2" },
+        { "cinematic", "opening_swish_3" },
+        { "cinematic", "opening_swish_4" },
+        { "cinematic", "opening_turtle_ugh" },
+        { "cinematic", "opening_up_1" },
+        { "cinematic", "opening_up_2" },
+        { "cinematic", "opening_wind" }
+    },{ // 54
+    },{ // 55
+    },{ // 56
+        { "jazz", "ledge" },
+        { "jazz", "hurt_1" },
+        { "jazz", "hurt_2" },
+        { "jazz", "hurt_3" },
+        { "jazz", "hurt_4" },
+        { "jazz", "idle_flavor_3" },
+        { "jazz", "hurt_5" },
+        { "jazz", "hurt_6" },
+        { "jazz", "hurt_7" },
+        { "jazz", "hurt_8" },
+        { "jazz", "carrot" },
+        { "jazz", "idle_flavor_4" }
+    },{ // 57
+    },{ // 58
+        { "lab_rat", "attack" },
+        { "lab_rat", "noise_1" },
+        { "lab_rat", "noise_2" },
+        { "lab_rat", "noise_3" },
+        { "lab_rat", "noise_4" },
+        { "lab_rat", "noise_5" }
+    },{ // 59
+        { "lizard", "noise_1" },
+        { "lizard", "noise_2" },
+        { "lizard", "noise_3" },
+        { "lizard", "noise_4" }
+    },{ // 60 + 3 TSFCC (Lori)
+    },{ // 61
+    },{ // 62
+        { "ui", "select_1" },
+        { "ui", "select_2" },
+        { "ui", "select_3" },
+        { "ui", "select_4" },
+        { "ui", "select_5" },
+        { "ui", "select_6" },
+        { "ui", "select_7" },
+        { "ui", "type_char" },
+        { "ui", "type_enter" }
+    },{ // 63
+        { "monkey", "banana_splat" },
+        { "monkey", "banana_throw" }
+    },{ // 64
+        { "moth", "flap" }
+    },{ // 65
+        { "cinematic", "orangegames_1_boom_l" },
+        { "cinematic", "orangegames_1_boom_r" },
+        { "cinematic", "orangegames_7_bubble_l" },
+        { "cinematic", "orangegames_7_bubble_r" },
+        { "cinematic", "orangegames_2_glass_1_l" },
+        { "cinematic", "orangegames_2_glass_1_r" },
+        { "cinematic", "orangegames_5_glass_2_l" },
+        { "cinematic", "orangegames_5_glass_2_r" },
+        { "cinematic", "orangegames_6_merge" },
+        { "cinematic", "orangegames_3_sweep_1_l" },
+        { "cinematic", "orangegames_3_sweep_1_r" },
+        { "cinematic", "orangegames_4_sweep_2_l" },
+        { "cinematic", "orangegames_4_sweep_2_r" },
+        { "cinematic", "orangegames_5_sweep_3_l" },
+        { "cinematic", "orangegames_5_sweep_3_r" }
+    },{ // 66
+        { "cinematic", "project2_unused_crunch" },
+        { "cinematic", "project2_10_fart" },
+        { "cinematic", "project2_unused_foew1" },
+        { "cinematic", "project2_unused_foew4" },
+        { "cinematic", "project2_unused_foew5" },
+        { "cinematic", "project2_unused_frog1" },
+        { "cinematic", "project2_unused_frog2" },
+        { "cinematic", "project2_unused_frog3" },
+        { "cinematic", "project2_unused_frog4" },
+        { "cinematic", "project2_unused_frog5" },
+        { "cinematic", "project2_unused_kiss4" },
+        { "cinematic", "project2_unused_open" },
+        { "cinematic", "project2_unused_pinch1" },
+        { "cinematic", "project2_unused_pinch2" },
+        { "cinematic", "project2_3_plop_1" },
+        { "cinematic", "project2_4_plop_2" },
+        { "cinematic", "project2_5_plop_3" },
+        { "cinematic", "project2_6_plop_4" },
+        { "cinematic", "project2_7_plop_5" },
+        { "cinematic", "project2_9_spit" },
+        { "cinematic", "project2_unused_splout" },
+        { "cinematic", "project2_2_splat" },
+        { "cinematic", "project2_1_8_throw" },
+        { "cinematic", "project2_unused_tong" }
+    },{ // 67
+        { "object", "savepoint_open" },
+        { "object", "copter" },
+        { "unknown", "unknown_pickup_stretch1a" }
+    },{ // 68
+        { "pinball", "bumper_hit" },
+        { "pinball", "flipper_1" },
+        { "pinball", "flipper_2" },
+        { "pinball", "flipper_3" },
+        { "pinball", "flipper_4" }
+    },{ // 69
+    },{ // 70
+    },{ // 71
+        { "queen", "spring" },
+        { "queen", "scream" }
+    },{ // 72
+        { "rapier", "die" },
+        { "rapier", "noise_1" },
+        { "rapier", "noise_2" },
+        { "rapier", "noise_3" },
+        { "rapier", "clunk" }
+    },{ // 73
+    },{ // 74
+        { "robot", "unknown_big1" },
+        { "robot", "unknown_big2" },
+        { "robot", "unknown_can1" },
+        { "robot", "unknown_can2" },
+        { "robot", "attack_start" },
+        { "robot", "attack_end" },
+        { "robot", "attack" },
+        { "robot", "unknown_hydropuf" },
+        { "robot", "unknown_idle1" },
+        { "robot", "unknown_idle2" },
+        { "robot", "unknown_jmpcan1" },
+        { "robot", "unknown_jmpcan10" },
+        { "robot", "unknown_jmpcan2" },
+        { "robot", "unknown_jmpcan3" },
+        { "robot", "unknown_jmpcan4" },
+        { "robot", "unknown_jmpcan5" },
+        { "robot", "unknown_jmpcan6" },
+        { "robot", "unknown_jmpcan7" },
+        { "robot", "unknown_jmpcan8" },
+        { "robot", "unknown_jmpcan9" },
+        { "robot", "shrapnel_1" },
+        { "robot", "shrapnel_2" },
+        { "robot", "shrapnel_3" },
+        { "robot", "shrapnel_4" },
+        { "robot", "shrapnel_5" },
+        { "robot", "attack_start_shutter" },
+        { "robot", "unknown_out" },
+        { "robot", "unknown_poep" },
+        { "robot", "unknown_pole" },
+        { "robot", "unknown_shoot" },
+        { "robot", "walk_1" },
+        { "robot", "walk_2" },
+        { "robot", "walk_3" }
+    },{ // 75
+        { "object", "rolling_rock" }
+    },{ // 76
+    },{ // 77
+        { "unknown", "sugar_rush_heartbeat" }, // Jazz2AnimVersion::ORIGINAL | Jazz2AnimVersion::HH
+        { "pickup", "food_sugar_rush" },
+    },{ // 78
+        { "common", "science_noise" }
+    },{ // 79
+        { "skeleton", "bone_1" },
+        { "skeleton", "bone_2" },
+        { "skeleton", "bone_3" },
+        { "skeleton", "bone_4" },
+        { "skeleton", "bone_5" },
+        { "skeleton", "bone_6" }
+    },{ // 80
+        { "pole", "tree_fall_1" },
+        { "pole", "tree_fall_2" },
+        { "pole", "tree_fall_3" }
+    },{ // 81
+    },{ // 82
+        { "spike", "missile_1" },
+        { "spike", "missile_2" },
+        { "spike", "missile_3" },
+        { "spike", "noise" },
+        { "spike", "lock_on" }
+    },{ // 83
+    },{ // 84
+    },{ // 85
+    },{ // 86
+    },{ // 87
+    },{ // 88
+        { "spaz", "hurt_1" },
+        { "spaz", "hurt_2" },
+        { "spaz", "idle_flavor_3_bird_land" },
+        { "spaz", "idle_flavor_4" },
+        { "spaz", "idle_flavor_3_bird" },
+        { "spaz", "idle_flavor_3_eat" },
+        { "spaz", "jump_1" },
+        { "spaz", "jump_2" },
+        { "spaz", "idle_flavor_2" },
+        { "spaz", "hihi" },
+        { "spaz", "spring_1" },
+        { "spaz", "double_jump" },
+        { "spaz", "sidekick_1" },
+        { "spaz", "sidekick_2" },
+        { "spaz", "spring_2" },
+        { "spaz", "oooh" },
+        { "spaz", "ledge" },
+        { "spaz", "jump_3" },
+        { "spaz", "jump_4" }
+    },{ // 89
+    },{ // 90
+    },{ // 91
+    },{ // 92
+        { "spring", "spring_ver_down" },
+        { "spring", "spring" }
+    },{ // 93
+        { "common", "steam_note" }
+    },{ // 94
+        { "unimplemented", "dizzy" }
+    },{ // 95
+        { "sucker_tube", "deflate" },
+        { "sucker_tube", "pinch_1" },
+        { "sucker_tube", "pinch_2" },
+        { "sucker_tube", "pinch_3" },
+        { "sucker_tube", "plop_1" },
+        { "sucker_tube", "plop_2" },
+        { "sucker_tube", "plop_3" },
+        { "sucker_tube", "plop_4" },
+        { "sucker_tube", "up" }
+    },{ // 96
+    },{ // 97
+        { "tough_turtle_boss", "attack_start" },
+        { "tough_turtle_boss", "attack_end" },
+        { "tough_turtle_boss", "mace" }
+    },{ // 98
+    },{ // 99
+        { "turtle", "attack_bite" },
+        { "turtle", "turn_start" },
+        { "turtle", "shell_collide" },
+        { "turtle", "idle_1" },
+        { "turtle", "idle_2" },
+        { "turtle", "attack_neck" },
+        { "turtle", "noise_1" },
+        { "turtle", "noise_2" },
+        { "turtle", "noise_3" },
+        { "turtle", "noise_4" },
+        { "turtle", "turn_end" }
+    },{ // 100
+    },{ // 101
+        { "uterus", "closed_start" },
+        { "uterus", "closed_end" },
+        { "crab", "noise_1" },
+        { "crab", "noise_2" },
+        { "crab", "noise_3" },
+        { "crab", "noise_4" },
+        { "crab", "noise_5" },
+        { "crab", "noise_6" },
+        { "crab", "noise_7" },
+        { "crab", "noise_8" },
+        { "uterus", "scream" },
+        { "crab", "step_1" },
+        { "crab", "step_2" }
+    },{ // 102
+    },{ // 103
+    },{ // 104
+    },{ // 105
+    },{ // 106
+    },{ // 107
+        { "common", "wind" }
+    },{ // 108
+        { "witch", "laugh" },
+        { "witch", "magic" }
+    }
+};

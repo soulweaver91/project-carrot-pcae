@@ -30,10 +30,8 @@ Jazz2AnimLib* Jazz2AnimLib::fromFile(const QString& filename, bool strictParser)
 }
 
 void Jazz2AnimLib::extractAllResources(const QDir& directory) {
-    auto mapper = std::make_unique<IDMapper>(version);
-
-    std::shared_ptr<AnimIDMap> animMapping = mapper->getAnimMapping();
-    std::shared_ptr<SampleIDMap> sampleMapping = mapper->getSampleMapping();
+    std::shared_ptr<AnimIDMap> animMapping = IDMapper::getAnimMap(version);
+    std::shared_ptr<SampleIDMap> sampleMapping = IDMapper::getSampleMap(version);
 
     for (auto& set : sets) {
         set->writeAssetsToRawFiles(directory, animMapping, sampleMapping, version);
@@ -100,7 +98,7 @@ void Jazz2AnimLib::loadSets(QByteArray& rawData) {
         }
     }
 
-    bool seemsLikeCC = (sets.at(55)->getAnimations()->length() == 5);
+    bool seemsLikeCC = (sets.at(65)->getAnimations()->length() > 5);
     if (headerLength == 464) {
         version = Jazz2AnimVersion::ORIGINAL;
     } else if (headerLength == 500 && seemsLikeCC) {

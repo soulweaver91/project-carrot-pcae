@@ -41,7 +41,11 @@ Jazz2AnimSet::Jazz2AnimSet(quint16 number, Jazz2FormatDataBlock& data) : number(
 
 void Jazz2AnimSet::writeAssetsToRawFiles(const QDir& outDir, std::shared_ptr<AnimIDMap> animMapping, std::shared_ptr<SampleIDMap> sampleMapping, Jazz2AnimVersion version) {
     for (auto& anim : animations) {
-        AnimMapping mappingForAnim = animMapping->value(qMakePair(number, anim.number), IDMapper::EMPTY_ANIM_MAPPING);
+        AnimMapping mappingForAnim = IDMapper::EMPTY_ANIM_MAPPING;
+        if (animMapping->length() > number && animMapping->at(number).length() > anim.number) {
+            mappingForAnim = animMapping->at(number).at(anim.number);
+        }
+
         QString filename;
         if (mappingForAnim.name == "") {
             filename = "s" + QString::number(number) + "_a" + QString::number(anim.number) + ".png";
@@ -58,7 +62,11 @@ void Jazz2AnimSet::writeAssetsToRawFiles(const QDir& outDir, std::shared_ptr<Ani
     }
 
     for (auto& sample : audioSamples) {
-        SampleMapping mappingForSample = sampleMapping->value(qMakePair(number, sample.number), IDMapper::EMPTY_SAMPLE_MAPPING);
+        SampleMapping mappingForSample = IDMapper::EMPTY_SAMPLE_MAPPING;
+        if (sampleMapping->length() > number && sampleMapping->at(number).length() > sample.number) {
+            mappingForSample = sampleMapping->at(number).at(sample.number);
+        }
+
         QString filename;
         if (mappingForSample.name == "") {
             filename = "s" + QString::number(number) + "_s" + QString::number(sample.number) + ".wav";
