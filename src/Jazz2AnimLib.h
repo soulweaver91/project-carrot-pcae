@@ -13,7 +13,8 @@ enum Jazz2AnimVersion {
     ORIGINAL,
     TSF,
     CC,
-    HH
+    HH,
+    UNKNOWN
 };
 
 class Jazz2AnimSet;

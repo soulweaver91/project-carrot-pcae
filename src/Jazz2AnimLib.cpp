@@ -44,6 +44,9 @@ void Jazz2AnimLib::extractAllResources(const QDir& directory, std::ostream& prog
         case Jazz2AnimVersion::CC:
             progressOutput << " Christmas Chronicles (1.24x)";
             break;
+        case Jazz2AnimVersion::UNKNOWN:
+            progressOutput << " (unknown version)";
+            break;
     }
     progressOutput << ".\n";
 
