@@ -36,6 +36,18 @@ QString Jazz2FormatParseException::friendlyText() {
         case HEADER_SET_LENGTH_MISMATCH:
             return "Header length did not match with the number of sets in the library!";
             break;
+        case INVALID_SET_MAGIC:
+            return "File subsection not recognized as an animation set!";
+            break;
+        case INVALID_SAMPLE_MAGIC:
+            return "Sound sample format not recognized!";
+            break;
+        case UNEXPECTED_SAMPLE_LENGTH:
+            return "Unexpected sound sample length!";
+            break;
+        case END_OF_IMAGE_DATA_NOT_FOUND:
+            return "Image data appeared to not be terminated correctly!";
+            break;
         default:
             return "Unknown error!";
     }

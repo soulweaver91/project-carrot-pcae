@@ -3,16 +3,18 @@
 # ------------------------------------------------------
 
 HEADERS += ./src/IDMapping.h \
-    ./src/Palette.h \
-    ./src/Jazz2AnimLib.h \
-    ./src/Version.h \
-    ./src/PCAnimExtractor.h \
+    ./src/Jazz2AnimSet.h \
     ./src/Jazz2FormatDataBlock.h \
     ./src/Jazz2FormatParseException.h \
-    ./src/Jazz2AnimSet.h
+    ./src/Palette.h \
+    ./src/Jazz2AnimLib.h \
+    ./src/PCAnimExtractor.h \
+    ./src/Version.h \
+    ./src/Jazz2Anim.h \
+    ./src/Jazz2Sample.h
 SOURCES += ./src/IDMapping.cpp \
-    ./src/PCAnimExtractor.cpp \
     ./src/Jazz2AnimLib.cpp \
+    ./src/Jazz2AnimSet.cpp \
     ./src/Jazz2FormatDataBlock.cpp \
     ./src/Jazz2FormatParseException.cpp \
-    ./src/Jazz2AnimSet.cpp
+    ./src/PCAnimExtractor.cpp

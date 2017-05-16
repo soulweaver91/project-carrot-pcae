@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QByteArray>
 #include <QDir>
+#include <QFile>
 
 #include "Jazz2FormatDataBlock.h"
 

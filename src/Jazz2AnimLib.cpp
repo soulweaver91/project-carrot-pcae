@@ -129,9 +129,7 @@ void Jazz2AnimLib::loadSets(QByteArray& rawData) {
             Jazz2FormatDataBlock dataBlock(setData, false, setData.length());
             sets << std::make_shared<Jazz2AnimSet>(i, dataBlock);
         } catch (Jazz2FormatParseException e) {
-            throw;
-            // TODO: warn about skipped set
-            // TODO: actually insert an empty set
+            sets << std::make_shared<Jazz2AnimSet>(i, e.friendlyText());
         }
     }
 

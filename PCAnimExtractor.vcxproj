@@ -154,6 +154,8 @@
     <ClCompile Include="src\PCAnimExtractor.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Jazz2Anim.h" />
+    <ClInclude Include="src\Jazz2Sample.h" />
     <ClInclude Include="src\IDMapping.h" />
     <ClInclude Include="src\Jazz2AnimSet.h" />
     <ClInclude Include="src\Jazz2FormatDataBlock.h" />
