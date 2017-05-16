@@ -7,6 +7,10 @@
 
 std::shared_ptr<AnimIDMap> IDMapper::getAnimMap(Jazz2AnimVersion version) {
     std::shared_ptr<AnimIDMap> map = std::make_shared<AnimIDMap>(BASE_GAME_ANIM_MAP);
+
+    if (version == Jazz2AnimVersion::UNKNOWN) {
+        return std::make_shared<AnimIDMap>();
+    }
     
     // Go backwards, adding and removing assets that are different between versions.
     // This order makes it easier to keep track of the exact positions.
@@ -194,6 +198,10 @@ std::shared_ptr<AnimIDMap> IDMapper::getAnimMap(Jazz2AnimVersion version) {
 
 std::shared_ptr<SampleIDMap> IDMapper::getSampleMap(Jazz2AnimVersion version) {
     std::shared_ptr<SampleIDMap> map = std::make_shared<SampleIDMap>(BASE_GAME_SAMPLE_MAP);
+
+    if (version == Jazz2AnimVersion::UNKNOWN) {
+        return std::make_shared<SampleIDMap>();
+    }
 
     // Go backwards, adding and removing assets that are different between versions.
     // This order makes it easier to keep track of the exact positions.

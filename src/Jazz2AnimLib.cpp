@@ -33,22 +33,22 @@ void Jazz2AnimLib::extractAllResources(const QDir& directory, std::ostream& prog
     progressOutput << "Detected as Anims.j2a for Jazz Jackrabbit 2";
     switch (version) {
         case Jazz2AnimVersion::ORIGINAL:
-            progressOutput << " (1.20-1.23)";
+            progressOutput << " (1.20-1.23).\n\n";
             break;
         case Jazz2AnimVersion::HH:
-            progressOutput << " Holiday Hare (1.23x)";
+            progressOutput << " Holiday Hare (1.23x).\n\n";
             break;
         case Jazz2AnimVersion::TSF:
-            progressOutput << ": The Secret Files (1.24)";
+            progressOutput << ": The Secret Files (1.24).\n\n";
             break;
         case Jazz2AnimVersion::CC:
-            progressOutput << " Christmas Chronicles (1.24x)";
+            progressOutput << " Christmas Chronicles (1.24x).\n\n";
             break;
         case Jazz2AnimVersion::UNKNOWN:
-            progressOutput << " (unknown version)";
+            progressOutput << " (unknown version).\n"
+                           << "WARNING: Conversion mapping is not used and some resource types may not be extracted.\n\n";
             break;
     }
-    progressOutput << ".\n";
 
     uint i = 0;
     uint animCount = 0;
